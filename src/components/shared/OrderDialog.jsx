@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { site } from '../../data/site'
+import { createLead } from '../../lib/leads'
 import Button from '../ui/Button'
 import IconButton from '../ui/IconButton'
 import { useSmoothScroll } from '../layout/SmoothScroll'
+import { useScrollLock } from '../../hooks/useScrollLock'
 
 /**
  * Accessible order-request modal. Front-end only: on submit it shows a
@@ -11,52 +13,61 @@ import { useSmoothScroll } from '../layout/SmoothScroll'
  */
 export default function OrderDialog({ open, onClose, product }) {
   const [sent, setSent] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
   const lenis = useSmoothScroll()
 
+  // iOS-safe scroll lock (position:fixed body) shared with the burger menu.
+  useScrollLock(open, lenis)
+
   useEffect(() => {
-    if (!open) return
+    if (!open) return undefined
     const onKey = (e) => e.key === 'Escape' && onClose()
-    const scrollY = window.scrollY
-    const originalStyles = {
-      position: document.body.style.position,
-      top: document.body.style.top,
-      width: document.body.style.width,
-      overflow: document.body.style.overflow,
-    }
-
     document.addEventListener('keydown', onKey)
-    lenis?.stop()
-    document.body.style.position = 'fixed'
-    document.body.style.top = `-${scrollY}px`
-    document.body.style.width = '100%'
-    document.body.style.overflow = 'hidden'
-
-    return () => {
-      document.removeEventListener('keydown', onKey)
-      document.body.style.position = originalStyles.position
-      document.body.style.top = originalStyles.top
-      document.body.style.width = originalStyles.width
-      document.body.style.overflow = originalStyles.overflow
-      window.scrollTo({ top: scrollY, left: 0, behavior: 'auto' })
-      lenis?.start()
-    }
-  }, [open, onClose, lenis])
+    return () => document.removeEventListener('keydown', onKey)
+  }, [open, onClose])
 
   useEffect(() => {
-    if (!open) setSent(false)
+    if (!open) {
+      setSent(false)
+      setSubmitting(false)
+      setError('')
+    }
   }, [open])
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // TODO: POST to backend / Telegram bot / CRM.
-    setSent(true)
+    setSubmitting(true)
+    setError('')
+
+    const form = e.currentTarget
+    const data = new FormData(form)
+
+    try {
+      await createLead({
+        type: 'order',
+        source: 'order-dialog',
+        product,
+        name: data.get('name'),
+        phone: data.get('phone'),
+        preferredDate: data.get('date'),
+        note: data.get('note'),
+      })
+      form.reset()
+      setSent(true)
+    } catch (err) {
+      console.error(err)
+      setError('Не вдалося надіслати заявку. Перевірте Firebase або спробуйте ще раз')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-[80] flex h-[100dvh] items-center justify-center overflow-hidden px-3 py-[max(0.75rem,env(safe-area-inset-top,0px))]"
+          className="fixed inset-0 z-[80] flex h-[100dvh] items-center justify-center overflow-hidden px-3 pt-[max(0.75rem,env(safe-area-inset-top,0px))] pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -71,7 +82,7 @@ export default function OrderDialog({ open, onClose, product }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.98 }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="relative flex max-h-full min-h-0 w-full max-w-lg overflow-hidden rounded-lg border border-cream/15 bg-ink-800"
+            className="relative flex max-h-full min-h-0 w-full max-w-lg overflow-hidden rounded-lg border border-blood-400/20 bg-ink-800"
           >
             <IconButton
               onClick={onClose}
@@ -144,17 +155,24 @@ export default function OrderDialog({ open, onClose, product }) {
                       rows={3}
                       defaultValue={product ? `Десерт: ${product}. ` : ''}
                       placeholder="Кількість персон, тематика, побажання…"
-                      className="focus-ring w-full resize-none rounded-md border border-cream/20 bg-ink px-4 py-3 text-cream placeholder:text-mute focus:border-cream/50"
+                      className="w-full resize-none rounded-md border border-wine-700/70 bg-ink px-4 py-3 text-cream placeholder:text-mute transition-colors focus:border-blood-400/70 focus:outline-none focus:ring-1 focus:ring-blood-400/30"
                     />
                   </div>
+
+                  {error && (
+                    <p className="rounded-md border border-blood-400/40 bg-blood/10 px-4 py-3 text-sm text-blood-400">
+                      {error}
+                    </p>
+                  )}
 
                   <Button
                     type="submit"
                     size="lg"
                     arrow={false}
+                    disabled={submitting}
                     className="w-full"
                   >
-                    Надіслати заявку
+                    {submitting ? 'Надсилаємо…' : 'Надіслати заявку'}
                   </Button>
                   <p className="text-center text-xs text-mute">
                     або зателефонуйте{' '}
@@ -186,7 +204,7 @@ function Field({ label, name, type = 'text', ...rest }) {
         id={`ord-${name}`}
         name={name}
         type={type}
-        className={`focus-ring min-w-0 w-full rounded-md border border-cream/20 bg-ink px-4 py-3 text-base text-cream placeholder:text-mute focus:border-cream/50 ${
+        className={`min-w-0 w-full rounded-md border border-wine-700/70 bg-ink px-4 py-3 text-base text-cream placeholder:text-mute transition-colors focus:border-blood-400/70 focus:outline-none focus:ring-1 focus:ring-blood-400/30 ${
           type === 'date'
             ? 'block h-12 min-h-12 max-w-full appearance-none overflow-hidden py-0 leading-normal'
             : ''

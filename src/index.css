@@ -11,6 +11,15 @@
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     touch-action: pan-x pan-y;
+    /* Paint the whole document — including the area exposed by iOS
+       rubber-band overscroll — with the brand ink instead of white. */
+    background-color: #0c0809;
+    /* Contain overscroll so pull-past-the-edge doesn't chain to the WebView
+       host (Telegram/Safari) or reveal a white gutter. */
+    overscroll-behavior: none;
+    /* Modern viewport unit that tracks the address-bar show/hide on iOS. */
+    min-height: 100svh;
+    min-height: 100dvh;
   }
 
   /* Lenis manages the scroll — disable native smooth so it doesn't fight */
@@ -29,6 +38,9 @@
     @apply bg-ink text-cream font-sans antialiased;
     font-feature-settings: 'ss01', 'cv01';
     overflow-x: hidden;
+    overscroll-behavior-y: none;
+    min-height: 100svh;
+    min-height: 100dvh;
   }
 
   ::selection {
@@ -124,15 +136,52 @@
   }
 
   .focus-ring:focus-visible {
-    @apply outline-none ring-2 ring-ember ring-offset-2 ring-offset-ink;
+    @apply outline-none ring-1 ring-blood-400/70 ring-offset-0;
+  }
+
+  .cms-input {
+    @apply w-full rounded-md border border-wine-700/70 bg-ink px-4 py-3 text-sm text-cream placeholder:text-mute transition-colors focus:border-blood-400/70 focus:outline-none focus:ring-1 focus:ring-blood-400/30;
   }
 
   .safe-area-top {
     padding-top: env(safe-area-inset-top, 0px);
   }
 
+  /* Opaque strip that always fills the top safe-area (status bar / Dynamic
+     Island / notch). Sits above the header so page content can never be seen
+     under the system bar, even while the transparent header is over the hero. */
+  .safe-area-cover {
+    position: fixed;
+    inset: 0 0 auto 0;
+    height: env(safe-area-inset-top, 0px);
+    background-color: #0c0809;
+    z-index: 60;
+    pointer-events: none;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+
+  /* iOS/Safari: fixed elements don't repaint during momentum scroll, so the
+     header visibly lags and slides off-screen. Promoting it to its own GPU
+     layer forces Safari to keep it pinned in sync with the scroll. */
+  .ios-fixed {
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    will-change: transform;
+  }
+
   .safe-area-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Full viewport height with a progressive fallback: plain vh for legacy
+     engines, then the dynamic unit that tracks the iOS address bar. */
+  .min-h-dvh {
+    min-height: 100vh;
+    min-height: 100svh;
+    min-height: 100dvh;
   }
 
   .safe-area-inline {

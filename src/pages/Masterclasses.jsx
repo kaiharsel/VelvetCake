@@ -8,7 +8,10 @@ import SocialLink from '../components/ui/SocialLink'
 import Button from '../components/ui/Button'
 import DelayedButton from '../components/ui/DelayedButton'
 import ScrollText from '../components/ui/ScrollText'
+import CarouselDots from '../components/ui/CarouselDots'
+import FormSelect from '../components/ui/FormSelect'
 import FaqSection from '../components/shared/FaqSection'
+import { useSnapIndicator } from '../hooks/useSnapIndicator'
 import {
   masterclasses,
   masterclassAudience,
@@ -17,56 +20,129 @@ import {
 } from '../data/content'
 import { site } from '../data/site'
 import { gsap, prefersReducedMotion } from '../lib/gsap'
+import { createLead } from '../lib/leads'
 
 const fmt = (p) => String(p)
+const masterclassGallery = ['Оформлення', 'Крем', 'Декор', 'Готовий бенто']
 
 export default function Masterclasses() {
   const heroRef = useRef(null)
   const [selected, setSelected] = useState(masterclasses[0].slug)
   const [sent, setSent] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
+  const { active: galleryActive, handleScroll: handleGalleryScroll } = useSnapIndicator({
+    count: masterclassGallery.length,
+  })
 
   useLayoutEffect(() => {
-    if (prefersReducedMotion) return
     const el = heroRef.current
     if (!el) return
+
+    const image = el.querySelector('[data-mh-img]')
+    let removePointerMove = () => {}
+
     const ctx = gsap.context(() => {
-      gsap
-        .timeline({ defaults: { ease: 'power4.out' } })
-        .from('[data-mh-line] > span', { yPercent: 115, duration: 1.1, stagger: 0.12 })
-        .from('[data-mh-fade]', { opacity: 0, y: 24, duration: 1, stagger: 0.1 }, '-=0.6')
-      gsap.to('[data-mh-img]', {
-        yPercent: 15,
-        ease: 'none',
-        scrollTrigger: { trigger: el, start: 'top top', end: 'bottom top', scrub: true },
-      })
+      if (!prefersReducedMotion) {
+        gsap
+          .timeline({ defaults: { ease: 'power4.out' } })
+          .from('[data-mh-line] > span', { yPercent: 115, duration: 1.1, stagger: 0.12 })
+          .from('[data-mh-fade]', { opacity: 0, y: 24, duration: 1, stagger: 0.1 }, '-=0.6')
+          .from(image, { scale: 1.15, duration: 1.6, ease: 'power3.out' }, 0)
+
+        if (window.matchMedia('(min-width: 768px)').matches) {
+          gsap.to(image, {
+            yPercent: 18,
+            ease: 'none',
+            scrollTrigger: { trigger: el, start: 'top top', end: 'bottom top', scrub: true },
+          })
+        }
+
+        const onMove = (event) => {
+          const rx = (event.clientX / window.innerWidth - 0.5) * 2
+          const ry = (event.clientY / window.innerHeight - 0.5) * 2
+          gsap.to(image, {
+            x: rx * 18,
+            y: ry * 18,
+            duration: 0.8,
+            ease: 'power2.out',
+            overwrite: 'auto',
+          })
+        }
+
+        if (window.matchMedia('(pointer: fine)').matches) {
+          window.addEventListener('mousemove', onMove)
+          removePointerMove = () => window.removeEventListener('mousemove', onMove)
+        }
+      }
     }, el)
-    return () => ctx.revert()
+
+    return () => {
+      removePointerMove()
+      ctx.revert()
+    }
   }, [])
 
-  const handleBook = (e) => {
+  const handleBook = async (e) => {
     e.preventDefault()
-    setSent(true)
+    setSubmitting(true)
+    setError('')
+
+    const form = e.currentTarget
+    const data = new FormData(form)
+    const pickedClass = masterclasses.find((mc) => mc.slug === selected)
+
+    try {
+      await createLead({
+        type: 'masterclass',
+        source: 'masterclasses-page',
+        name: data.get('name'),
+        phone: data.get('phone'),
+        seats: data.get('seats'),
+        classSlug: selected,
+        classTitle: pickedClass?.title,
+        note: pickedClass ? `Тема: ${pickedClass.title}` : '',
+      })
+      form.reset()
+      setSelected(masterclasses[0].slug)
+      setSent(true)
+    } catch (err) {
+      console.error(err)
+      setError('Не вдалося надіслати заявку. Перевірте Firebase або спробуйте ще раз')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
     <>
       <Seo
         title="Майстер-класи"
-        description="Майстер-класи VelvetCake: дзеркальна глазур, авторські торти, тарти та макарони. Для будь-якого рівня. Забронюйте місце онлайн"
+        description="Майстер-класи VelvetCake: дзеркальна глазур, авторські торти, трайфли та макарони. Для будь-якого рівня. Забронюйте місце онлайн"
         path="/masterclasses"
       />
 
       {/* Hero */}
       <section
         ref={heroRef}
-        className="relative flex min-h-[92svh] items-end overflow-hidden bg-wine-900 pb-16 pt-36"
+        className="relative flex min-h-[100svh] items-end overflow-hidden bg-wine-900 pb-16 pt-36 md:min-h-[92svh]"
       >
         <div className="absolute inset-0">
           <div data-mh-img className="absolute inset-[-8%]">
-            <Figure tone="wine" ratio="auto" priority className="h-full w-full" label="Майстер-клас" />
+            <Figure
+              src="/desserts/masterclasses-hero.png"
+              alt="Майстер-клас VelvetCake"
+              tone="wine"
+              ratio="auto"
+              priority
+              className="h-full w-full"
+              label="Майстер-клас"
+            />
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-ink/50" />
+          <div className="absolute inset-0 bg-ink/15" />
         </div>
+        <div className="pointer-events-none absolute inset-x-0 bottom-[-1px] z-[1] h-20 bg-gradient-to-b from-transparent to-ink" />
 
         <div className="container-shell relative z-10">
           <h1 className="display-hero font-display text-cream">
@@ -94,11 +170,14 @@ export default function Masterclasses() {
       </section>
 
       {/* Intro */}
-      <section className="bg-ink py-24 md:py-32">
+      <section className="relative -mt-px bg-ink py-24 md:py-32">
         <div className="container-shell">
           <ScrollText
             text="Маленьке свято в студії: тісне коло, шість пар рук у борошні, теплі лампи і ритуал оформлення останнього шару крему"
             className="display-lg max-w-4xl text-balance font-display text-cream"
+            mobileStart="top 68%"
+            desktopStart="top 66%"
+            desktopEnd="bottom 48%"
           />
         </div>
       </section>
@@ -110,7 +189,7 @@ export default function Masterclasses() {
             title={<>Оберіть свою <span className="italic text-blood-400">тему</span></>}
             lede="П'ять напрямків оформлення. Іменинник або іменинниця обирає смак, начинку та тему. Решта групи разом збирає тортики в тому ж стилі"
           />
-          <Reveal className="mt-14 flex flex-col" stagger={0.08} y={40}>
+          <Reveal className="mt-14 flex flex-col" stagger={0.08} start="top 118%" y={40}>
             {masterclasses.map((mc, i) => (
               <DelayedButton
                 key={mc.slug}
@@ -122,22 +201,21 @@ export default function Masterclasses() {
                 }}
                 className="group grid grid-cols-1 items-center gap-4 border-t border-cream/10 py-8 text-left transition-all duration-500 active:scale-[0.99] data-[pending=true]:scale-[0.99] data-[pending=true]:bg-cream/[0.03] last:border-b md:grid-cols-12 md:gap-6 md:hover:bg-cream/[0.03]"
               >
-                <span className="font-display text-2xl text-blood/40 md:col-span-1">
+                <span className="font-display text-4xl leading-none text-blood/40 md:col-span-1">
                   {String(i + 1).padStart(2, '0')}
                 </span>
-                <div className="md:col-span-5">
+                <div className="md:col-span-7">
                   <h3 className="font-display text-3xl text-cream transition-colors md:text-4xl md:group-hover:text-blood-400">
                     {mc.title}
                   </h3>
                   <p className="mt-2 max-w-md text-sm text-mute">{mc.text}</p>
                 </div>
-                <div className="text-sm text-cream/80 md:col-span-2">{mc.level}</div>
                 <div className="text-sm text-cream/80 md:col-span-2">
                   {mc.duration}, {mc.seats} місць
                 </div>
                 <div className="flex items-center justify-between gap-4 md:col-span-2 md:justify-end">
-                  <span className="price-display text-2xl font-semibold tracking-tight text-cream">
-                    {fmt(mc.price)}<span className="ml-1 text-sm text-mute">грн</span>
+                  <span className="price-display text-3xl font-semibold leading-none tracking-tight text-cream md:text-4xl">
+                    {fmt(mc.price)}<span className="ml-1.5 align-baseline text-base leading-none text-cream/80 md:text-lg">грн</span>
                   </span>
                   <ChevronRight className="text-blood-400 transition-transform md:group-hover:translate-x-1" />
                 </div>
@@ -201,10 +279,48 @@ export default function Masterclasses() {
       {/* Gallery */}
       <section className="bg-ink py-20 md:py-28">
         <div className="container-shell">
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
-            {['Оформлення', 'Крем', 'Декор', 'Готовий бенто'].map((cap, i) => (
+          <SectionHeading
+            title={<>Фото <span className="italic text-blood-400">процесу</span></>}
+            lede="Кілька моментів з майстер-класу, атмосфери студії та готових бенто"
+          />
+
+          <CarouselDots
+            count={masterclassGallery.length}
+            active={galleryActive}
+            className="mt-8 md:hidden"
+          />
+
+          <div
+            onScroll={handleGalleryScroll}
+            className="-mx-6 mt-10 flex snap-x snap-mandatory scroll-px-6 gap-5 overflow-x-auto px-6 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:hidden"
+          >
+            {masterclassGallery.map((cap, i) => (
+              <div
+                key={`mobile-${cap}`}
+                data-snap-item
+                className="relative w-[78vw] shrink-0 snap-center overflow-hidden rounded-[3px] first:snap-start sm:w-[56vw]"
+              >
+                <Figure
+                  src={`/desserts/masterclasses-gallery-${i + 1}.png`}
+                  alt={cap}
+                  tone={i % 2 ? 'blood' : 'wine'}
+                  ratio="4 / 5"
+                  label={cap}
+                />
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-14 hidden grid-cols-2 gap-4 md:grid md:grid-cols-4 md:gap-6">
+            {masterclassGallery.map((cap, i) => (
               <div key={cap} className={`overflow-hidden rounded-[3px] ${i % 2 ? 'md:mt-10' : ''}`}>
-                <Figure tone={i % 2 ? 'blood' : 'wine'} ratio="4 / 5" label={cap} />
+                <Figure
+                  src={`/desserts/masterclasses-gallery-${i + 1}.png`}
+                  alt={cap}
+                  tone={i % 2 ? 'blood' : 'wine'}
+                  ratio="4 / 5"
+                  label={cap}
+                />
               </div>
             ))}
           </div>
@@ -231,7 +347,7 @@ export default function Masterclasses() {
             </div>
           </div>
 
-          <div className="rounded-lg border border-cream/15 bg-ink-800 p-8 md:p-10">
+          <div className="rounded-lg border border-blood-400/15 bg-ink-800 p-8 md:p-10">
             {sent ? (
               <div className="py-10 text-center">
                 <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-blood text-2xl text-cream">✓</div>
@@ -251,43 +367,48 @@ export default function Masterclasses() {
                 <div>
                   <label htmlFor="bk-name" className="mb-2 block text-[11px] uppercase tracking-[0.14em] text-mute">Імʼя</label>
                   <input id="bk-name" name="name" required placeholder="Олена"
-                    className="focus-ring w-full rounded-md border border-cream/20 bg-ink px-4 py-3 text-cream placeholder:text-mute focus:border-cream/50" />
+                    className="w-full rounded-md border border-wine-700/70 bg-ink px-4 py-3 text-cream placeholder:text-mute transition-colors focus:border-blood-400/70 focus:outline-none focus:ring-1 focus:ring-blood-400/30" />
                 </div>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
                     <label htmlFor="bk-phone" className="mb-2 block text-[11px] uppercase tracking-[0.14em] text-mute">Телефон</label>
                     <input id="bk-phone" name="phone" type="tel" required placeholder="+380 __ ___ __ __"
-                      className="focus-ring w-full rounded-md border border-cream/20 bg-ink px-4 py-3 text-cream placeholder:text-mute focus:border-cream/50" />
+                      className="w-full rounded-md border border-wine-700/70 bg-ink px-4 py-3 text-cream placeholder:text-mute transition-colors focus:border-blood-400/70 focus:outline-none focus:ring-1 focus:ring-blood-400/30" />
                   </div>
                   <div>
                     <label htmlFor="bk-seats" className="mb-2 block text-[11px] uppercase tracking-[0.14em] text-mute">Місць</label>
                     <input id="bk-seats" name="seats" type="number" min="1" max="10" defaultValue="1"
-                      className="focus-ring w-full rounded-md border border-cream/20 bg-ink px-4 py-3 text-cream focus:border-cream/50" />
+                      className="w-full rounded-md border border-wine-700/70 bg-ink px-4 py-3 text-cream transition-colors focus:border-blood-400/70 focus:outline-none focus:ring-1 focus:ring-blood-400/30" />
                   </div>
                 </div>
                 <div>
                   <label htmlFor="bk-class" className="mb-2 block text-[11px] uppercase tracking-[0.14em] text-mute">Тема оформлення</label>
-                  <select
+                  <FormSelect
                     id="bk-class"
                     name="class"
                     value={selected}
-                    onChange={(e) => setSelected(e.target.value)}
-                    className="focus-ring w-full appearance-none rounded-md border border-cream/20 bg-ink px-4 py-3 text-cream focus:border-cream/50"
-                  >
-                    {masterclasses.map((mc) => (
-                      <option key={mc.slug} value={mc.slug}>
-                        {mc.title}, {fmt(mc.price)} грн
-                      </option>
-                    ))}
-                  </select>
+                    onChange={setSelected}
+                    ariaLabel="Тема оформлення"
+                    options={masterclasses.map((mc) => ({
+                      value: mc.slug,
+                      label: mc.title,
+                      meta: `${fmt(mc.price)} грн`,
+                    }))}
+                  />
                 </div>
+                {error && (
+                  <p className="rounded-md border border-blood-400/40 bg-blood/10 px-4 py-3 text-sm text-blood-400">
+                    {error}
+                  </p>
+                )}
                 <Button
                   type="submit"
                   size="lg"
                   arrow={false}
+                  disabled={submitting}
                   className="w-full"
                 >
-                  Забронювати місце
+                  {submitting ? 'Надсилаємо…' : 'Забронювати місце'}
                 </Button>
               </form>
             )}

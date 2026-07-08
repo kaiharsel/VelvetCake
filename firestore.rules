@@ -1,0 +1,28 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /leads/{leadId} {
+      // Public site forms can create new leads.
+      // For a portfolio/demo this is enough. For production add rate limiting
+      // through App Check, Cloud Functions or stricter validation.
+      allow create: if true;
+
+      // CRM access is only for signed-in Firebase Auth users.
+      allow read, update, delete: if request.auth != null;
+    }
+
+    match /desserts/{slug} {
+      // Public site reads product content from the CMS.
+      allow read: if true;
+
+      // CRM/CMS edits are only for signed-in admins.
+      allow create, update, delete: if request.auth != null;
+    }
+
+    // Future CMS collections should stay private by default until wired.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import Seo from '../components/ui/Seo'
 import Figure from '../components/ui/Figure'
@@ -6,16 +6,37 @@ import Reveal from '../components/ui/Reveal'
 import DessertCard from '../components/ui/DessertCard'
 import Button from '../components/ui/Button'
 import OrderDialog from '../components/shared/OrderDialog'
-import { categories, getDessert, getRelated } from '../data/desserts'
+import { categories } from '../data/desserts'
+import { useDessert } from '../hooks/useDesserts'
 
 const catLabel = (id) => categories.find((c) => c.id === id)?.label || ''
 const fmtPrice = (p) => String(p)
 
 export default function Dessert() {
   const { slug } = useParams()
-  const dessert = getDessert(slug)
+  const { dessert, related } = useDessert(slug)
   const [activeImg, setActiveImg] = useState(0)
   const [orderOpen, setOrderOpen] = useState(false)
+
+  const fallbackImage = dessert?.image || (dessert ? `/desserts/${dessert.slug}.png` : '')
+  const gallery = [
+    fallbackImage,
+    ...(dessert && Array.isArray(dessert.gallery) ? dessert.gallery : []),
+  ]
+    .filter(Boolean)
+    .filter((image, index, images) => images.indexOf(image) === index)
+    .slice(0, 4)
+  const activeImage = gallery[activeImg] || gallery[0] || fallbackImage
+
+  useEffect(() => {
+    setActiveImg(0)
+  }, [slug])
+
+  useEffect(() => {
+    if (gallery.length && activeImg >= gallery.length) {
+      setActiveImg(0)
+    }
+  }, [activeImg, gallery.length])
 
   if (!dessert) {
     return (
@@ -29,9 +50,6 @@ export default function Dessert() {
       </div>
     )
   }
-
-  const related = getRelated(slug, 3)
-  const gallery = [0, 1, 2, 3] // placeholder frames until real photos arrive
 
   return (
     <>
@@ -58,25 +76,32 @@ export default function Dessert() {
               <div className="overflow-hidden rounded-[4px]">
                 <Figure
                   key={activeImg}
+                  src={activeImage}
+                  alt={`${dessert.name}, фото ${activeImg + 1}`}
                   tone={dessert.tone}
                   ratio="4 / 5"
                   priority
                   label={`${dessert.name}, фото ${activeImg + 1}`}
-                  // src={`/desserts/${slug}-${activeImg + 1}.jpg`}
                 />
               </div>
               <div className="mt-4 grid grid-cols-4 gap-3">
-                {gallery.map((g) => (
+                {gallery.map((image, index) => (
                   <button
-                    key={g}
+                    key={`${image}-${index}`}
                     type="button"
-                    onClick={() => setActiveImg(g)}
-                    aria-label={`Показати фото ${g + 1}`}
+                    onClick={() => setActiveImg(index)}
+                    aria-label={`Показати фото ${index + 1}`}
                     className={`focus-ring overflow-hidden rounded-[3px] ring-1 transition ${
-                      activeImg === g ? 'ring-blood-400' : 'ring-cream/10 hover:ring-cream/40'
+                      activeImg === index ? 'ring-blood-400' : 'ring-cream/10 hover:ring-cream/40'
                     }`}
                   >
-                    <Figure tone={dessert.tone} ratio="1 / 1" label={`${g + 1}`} />
+                    <Figure
+                      src={image}
+                      alt=""
+                      tone={dessert.tone}
+                      ratio="1 / 1"
+                      label={`${index + 1}`}
+                    />
                   </button>
                 ))}
               </div>

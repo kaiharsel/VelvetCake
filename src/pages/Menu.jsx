@@ -6,11 +6,15 @@ import DessertCard from '../components/ui/DessertCard'
 import Button from '../components/ui/Button'
 import ChevronRight from '../components/ui/ChevronRight'
 import CtaSection from '../components/shared/CtaSection'
-import { categories, desserts } from '../data/desserts'
+import { categories } from '../data/desserts'
+import { site } from '../data/site'
+import { useDesserts } from '../hooks/useDesserts'
 import { gsap, prefersReducedMotion } from '../lib/gsap'
 
 export default function Menu() {
   const heroRef = useRef(null)
+  const controlsRef = useRef(null)
+  const catalogRef = useRef(null)
   const [params, setParams] = useSearchParams()
   const initialCat = params.get('cat') || 'all'
   const [cat, setCat] = useState(
@@ -18,6 +22,7 @@ export default function Menu() {
   )
   const [query, setQuery] = useState('')
   const [showCategoryHint, setShowCategoryHint] = useState(true)
+  const { desserts } = useDesserts()
 
   useLayoutEffect(() => {
     if (prefersReducedMotion) return
@@ -42,11 +47,36 @@ export default function Menu() {
     return () => ctx.revert()
   }, [])
 
+  const scrollToCatalogStart = () => {
+    window.requestAnimationFrame(() => {
+      const catalog = catalogRef.current
+      if (!catalog) return
+
+      const catalogTop = window.scrollY + catalog.getBoundingClientRect().top
+      const controlsBottom = controlsRef.current?.getBoundingClientRect().bottom
+      const fallbackOffset = window.matchMedia('(min-width: 768px)').matches ? 160 : 150
+      const offset =
+        controlsBottom && controlsBottom > 0 && controlsBottom < window.innerHeight
+          ? controlsBottom + 16
+          : fallbackOffset
+      const targetTop = Math.max(catalogTop - offset, 0)
+
+      if (window.scrollY <= targetTop + 12) return
+
+      window.scrollTo({
+        top: targetTop,
+        behavior: prefersReducedMotion ? 'auto' : 'smooth',
+      })
+    })
+  }
+
   const setCategory = (id) => {
     setCat(id)
-    if (id === 'all') params.delete('cat')
-    else params.set('cat', id)
-    setParams(params, { replace: true })
+    const nextParams = new URLSearchParams(params)
+    if (id === 'all') nextParams.delete('cat')
+    else nextParams.set('cat', id)
+    setParams(nextParams, { replace: true })
+    scrollToCatalogStart()
   }
 
   const filtered = useMemo(() => {
@@ -60,13 +90,13 @@ export default function Menu() {
         d.tagline.toLowerCase().includes(q)
       return matchCat && matchQuery
     })
-  }, [cat, query])
+  }, [cat, desserts, query])
 
   return (
     <>
       <Seo
         title="Меню"
-        description="Меню VelvetCake: авторські торти, тарти, тістечка та сигнатурні десерти темного люксу. Оберіть і оформіть замовлення онлайн"
+        description="Меню VelvetCake: авторські торти, трайфли, тістечка та сигнатурні десерти темного люксу. Оберіть і оформіть замовлення онлайн"
         path="/menu"
       />
 
@@ -94,7 +124,10 @@ export default function Menu() {
       </header>
 
       {/* Controls */}
-      <div className="below-mobile-header sticky z-30 border-y border-cream/10 bg-ink/85 backdrop-blur-md">
+      <div
+        ref={controlsRef}
+        className="below-mobile-header sticky z-30 border-y border-cream/10 bg-ink/85 backdrop-blur-md"
+      >
         <div className="container-shell flex flex-col gap-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="relative min-w-0 lg:flex-1">
             <div
@@ -115,10 +148,10 @@ export default function Menu() {
                   role="tab"
                   aria-selected={cat === c.id}
                   onClick={() => setCategory(c.id)}
-                  className={`focus-ring shrink-0 snap-start rounded-full px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.1em] transition-all duration-300 active:scale-95 ${
+                  className={`shrink-0 snap-start rounded-full px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.1em] transition-all duration-300 [-webkit-tap-highlight-color:transparent] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blood-400/70 active:scale-95 active:border-blood-400 active:text-blood-400 ${
                     cat === c.id
-                      ? 'bg-blood text-cream'
-                      : 'border border-cream/20 text-mute md:hover:border-cream/50 md:hover:text-cream'
+                      ? 'border border-blood bg-blood text-cream'
+                      : 'border border-cream/20 text-mute md:hover:border-blood-400 md:hover:bg-blood/10 md:hover:text-blood-400'
                   }`}
                 >
                   {c.label}
@@ -144,7 +177,7 @@ export default function Menu() {
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Пошук десерту…"
               aria-label="Пошук десерту"
-              className="focus-ring w-full rounded-full border border-cream/20 bg-transparent py-2.5 pl-11 pr-4 text-sm text-cream placeholder:text-mute focus:border-cream/50"
+              className="w-full rounded-full border border-wine-700/70 bg-transparent py-2.5 pl-11 pr-4 text-sm text-cream placeholder:text-mute transition-colors focus:border-blood-400/70 focus:outline-none focus:ring-1 focus:ring-blood-400/30"
             />
             <svg
               viewBox="0 0 24 24"
@@ -160,7 +193,7 @@ export default function Menu() {
       </div>
 
       {/* Grid */}
-      <section className="bg-ink py-14 md:py-20">
+      <section ref={catalogRef} className="bg-ink py-14 md:py-20">
         <div className="container-shell">
           <p className="mb-8 text-sm text-mute">
             Показано {filtered.length}{' '}
@@ -212,7 +245,11 @@ export default function Menu() {
             Замовте свій <span className="italic text-blood-400">десерт</span>
           </>
         }
-        primary={{ label: 'Написати нам', to: '/menu' }}
+        primary={{
+          label: 'Написати нам',
+          href: site.socials.find((social) => social.label === 'Instagram')?.href,
+          target: '_blank',
+        }}
         secondary={{ label: 'Майстер-класи', to: '/masterclasses' }}
       />
     </>

@@ -32,16 +32,20 @@ export default function Hero() {
           )
 
         // Parallax drift on the hero image as the page scrolls away.
-        gsap.to(imageWrap.current, {
-          yPercent: 18,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: el,
-            start: 'top top',
-            end: 'bottom top',
-            scrub: true,
-          },
-        })
+        // Touch scroll on phones makes scrubbed image movement feel jittery,
+        // so this is desktop-only.
+        if (window.matchMedia('(min-width: 768px)').matches) {
+          gsap.to(imageWrap.current, {
+            yPercent: 18,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: el,
+              start: 'top top',
+              end: 'bottom top',
+              scrub: true,
+            },
+          })
+        }
       }
 
       // Pointer parallax — subtle, desktop only.
@@ -74,12 +78,14 @@ export default function Hero() {
       <div className="absolute inset-0 -z-0">
         <div ref={imageWrap} className="absolute inset-[-8%]">
           <Figure
+            src="/desserts/hero-main.png"
+            alt="Кондитерка VelvetCake оформлює торт"
             tone="wine"
             ratio="auto"
             priority
             label="Головне фото"
             className="h-full w-full"
-            // src="/desserts/hero.jpg"  ← додайте фото сюди
+            imgClassName="object-center"
           />
         </div>
         {/* Cinematic vignette + gradient for text legibility */}

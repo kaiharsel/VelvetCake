@@ -11,6 +11,8 @@ export default function MasterclassTeaser() {
     if (prefersReducedMotion) return
     const el = media.current
     if (!el) return
+    if (!window.matchMedia('(min-width: 768px)').matches) return
+
     const ctx = gsap.context(() => {
       gsap.to(el.querySelector('[data-mc-img]'), {
         yPercent: -12,
@@ -27,7 +29,13 @@ export default function MasterclassTeaser() {
         <div className="grid items-center gap-12 md:grid-cols-2 md:gap-20">
           <div ref={media} className="relative order-2 overflow-hidden rounded-[3px] md:order-1">
             <div data-mc-img className="scale-110">
-              <Figure tone="wine" ratio="4 / 5" label="Майстер-клас" />
+              <Figure
+                src="/desserts/masterclass-home.png"
+                alt="Майстер-клас VelvetCake"
+                tone="wine"
+                ratio="4 / 5"
+                label="Майстер-клас"
+              />
             </div>
             <div className="absolute bottom-5 left-5 rounded-full border border-cream/15 bg-ink/85 px-5 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-cream/85 shadow-[0_10px_28px_rgba(0,0,0,0.28)] backdrop-blur-md">
               6–12 у групі

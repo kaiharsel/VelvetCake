@@ -18,6 +18,7 @@ export default function DessertCard({
   showTagline = true,
 }) {
   const { slug, name, category, short, price, unit, tone, tagline } = dessert
+  const image = dessert.image || `/desserts/${slug}.png`
 
   return (
     <DelayedLink
@@ -27,6 +28,8 @@ export default function DessertCard({
     >
       <div className="relative overflow-hidden rounded-[3px]">
         <Figure
+          src={image}
+          alt={name}
           tone={tone}
           ratio={ratio}
           label={name}
@@ -53,7 +56,7 @@ export default function DessertCard({
           {name}
         </h3>
 
-        <div className="mt-4 flex items-center justify-between gap-4 rounded-[4px] border border-cream/10 bg-cream/[0.025] px-4 py-3 transition-colors duration-300 md:group-hover:border-blood-400/35 md:group-hover:bg-blood/[0.06]">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-[4px] border border-cream/10 bg-cream/[0.025] px-4 py-3 transition-colors duration-300 md:group-hover:border-blood-400/35 md:group-hover:bg-blood/[0.06]">
           <div className="flex items-end gap-2 whitespace-nowrap">
             <span className="pb-[2px] text-[10px] font-semibold uppercase leading-none tracking-[0.14em] text-mute">
               Від

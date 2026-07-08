@@ -7,6 +7,7 @@ const tones = ['wine', 'ink', 'blood']
 
 export default function Advantages() {
   const section = useRef(null)
+  const mobileScrollFrame = useRef(null)
   const [active, setActive] = useState(0)
 
   useLayoutEffect(() => {
@@ -20,32 +21,53 @@ export default function Advantages() {
         items.forEach((item, i) => {
           ScrollTrigger.create({
             trigger: item,
-            start: 'top center',
-            end: 'bottom center',
-            onToggle: (self) => self.isActive && setActive(i),
+            start: 'top 72%',
+            end: 'bottom 38%',
+            onEnter: () => setActive(i),
+            onEnterBack: () => setActive(i),
+            invalidateOnRefresh: true,
           })
           if (!prefersReducedMotion) {
-            gsap.from(item.querySelector('[data-adv-media]'), {
-              yPercent: 12,
-              opacity: 0.4,
-              ease: 'none',
-              scrollTrigger: {
-                trigger: item,
-                start: 'top bottom',
-                end: 'top center',
-                scrub: true,
+            gsap.fromTo(
+              item.querySelector('[data-adv-media]'),
+              {
+                y: 48,
+                scale: 0.985,
+                opacity: 0,
               },
-            })
-            gsap.from(item.querySelector('[data-adv-copy]'), {
-              y: 36,
-              opacity: 0,
-              duration: 0.8,
-              ease: 'power3.out',
-              scrollTrigger: {
-                trigger: item,
-                start: 'top 72%',
+              {
+                y: 0,
+                scale: 1,
+                opacity: 1,
+                duration: 0.9,
+                ease: 'power3.out',
+                scrollTrigger: {
+                  trigger: item,
+                  start: 'top 104%',
+                  toggleActions: 'play none none none',
+                  invalidateOnRefresh: true,
+                },
               },
-            })
+            )
+            gsap.fromTo(
+              item.querySelector('[data-adv-copy]'),
+              {
+                y: 28,
+                opacity: 0,
+              },
+              {
+                y: 0,
+                opacity: 1,
+                duration: 0.8,
+                ease: 'power3.out',
+                scrollTrigger: {
+                  trigger: item,
+                  start: 'top 100%',
+                  toggleActions: 'play none none none',
+                  invalidateOnRefresh: true,
+                },
+              },
+            )
           }
         })
       }, el)
@@ -53,26 +75,36 @@ export default function Advantages() {
       return () => ctx.revert()
     })
 
-    return () => mm.revert()
+    return () => {
+      if (mobileScrollFrame.current) {
+        cancelAnimationFrame(mobileScrollFrame.current)
+      }
+      mm.revert()
+    }
   }, [])
 
   const handleMobileScroll = (event) => {
     const rail = event.currentTarget
-    const center = rail.scrollLeft + rail.clientWidth / 2
-    const cards = Array.from(rail.children)
-    let nearest = 0
-    let nearestDistance = Infinity
+    if (mobileScrollFrame.current) return
 
-    cards.forEach((card, index) => {
-      const cardCenter = card.offsetLeft + card.offsetWidth / 2
-      const distance = Math.abs(center - cardCenter)
-      if (distance < nearestDistance) {
-        nearest = index
-        nearestDistance = distance
-      }
+    mobileScrollFrame.current = requestAnimationFrame(() => {
+      const center = rail.scrollLeft + rail.clientWidth / 2
+      const cards = Array.from(rail.children)
+      let nearest = 0
+      let nearestDistance = Infinity
+
+      cards.forEach((card, index) => {
+        const cardCenter = card.offsetLeft + card.offsetWidth / 2
+        const distance = Math.abs(center - cardCenter)
+        if (distance < nearestDistance) {
+          nearest = index
+          nearestDistance = distance
+        }
+      })
+
+      setActive(nearest)
+      mobileScrollFrame.current = null
     })
-
-    setActive(nearest)
   }
 
   return (
@@ -123,16 +155,17 @@ export default function Advantages() {
 
           <div
             onScroll={handleMobileScroll}
-            className="-mx-6 mt-10 flex snap-x snap-mandatory scroll-px-8 gap-5 overflow-x-auto px-8 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="-mx-6 mt-10 flex snap-x snap-mandatory scroll-px-8 gap-5 overflow-x-auto overscroll-x-contain scroll-smooth px-8 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {advantages.map((a, i) => (
-              <article key={a.no} className="w-[82vw] shrink-0 snap-center first:snap-start">
+              <article key={a.no} className="w-[82vw] shrink-0 snap-center">
                 <div className="overflow-hidden rounded-[3px]">
                   <Figure
+                    src={`/desserts/advantage-${a.no}.png`}
+                    alt={a.title}
                     tone={tones[i % tones.length]}
                     ratio="5 / 4"
                     label={a.title}
-                    // src={`/desserts/adv-${a.no}.jpg`}
                   />
                 </div>
                 <p className="mt-6 max-w-md text-pretty leading-relaxed text-mute">
@@ -189,10 +222,11 @@ export default function Advantages() {
                 <div key={a.no} data-adv-item className="md:min-h-[70vh]">
                   <div data-adv-media className="overflow-hidden rounded-[3px]">
                     <Figure
+                      src={`/desserts/advantage-${a.no}.png`}
+                      alt={a.title}
                       tone={tones[i % tones.length]}
                       ratio="5 / 4"
                       label={a.title}
-                      // src={`/desserts/adv-${a.no}.jpg`}
                     />
                   </div>
                   <div data-adv-copy className="mt-6 flex items-start gap-4">

@@ -1,25 +1,30 @@
 import { useLayoutEffect, useRef } from 'react'
 import SectionHeading from '../ui/SectionHeading'
 import Figure from '../ui/Figure'
+import CarouselDots from '../ui/CarouselDots'
 import { galleryCaptions } from '../../data/content'
+import { useSnapIndicator } from '../../hooks/useSnapIndicator'
 import { gsap, prefersReducedMotion } from '../../lib/gsap'
 
 const items = [
   { tone: 'wine', ratio: '4 / 5', col: 0 },
-  { tone: 'blood', ratio: '1 / 1', col: 1 },
+  { tone: 'blood', ratio: '4 / 5', col: 1 },
   { tone: 'ink', ratio: '4 / 5', col: 2 },
   { tone: 'ink', ratio: '4 / 5', col: 0 },
   { tone: 'wine', ratio: '4 / 5', col: 1 },
-  { tone: 'blood', ratio: '1 / 1', col: 2 },
+  { tone: 'blood', ratio: '4 / 5', col: 2 },
 ]
 
 export default function Gallery() {
   const section = useRef(null)
+  const { active, handleScroll } = useSnapIndicator({ count: items.length })
 
   useLayoutEffect(() => {
     if (prefersReducedMotion) return
     const el = section.current
     if (!el) return
+    if (!window.matchMedia('(min-width: 768px)').matches) return
+
     const ctx = gsap.context(() => {
       // Columns drift at different speeds for depth.
       const speeds = [-60, 40, -90]
@@ -55,7 +60,33 @@ export default function Gallery() {
           lede="Світло, фактура й колір продумані до дрібниць. Так виглядає темний люкс"
         />
 
-        <div className="mt-16 grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">
+        <CarouselDots count={items.length} active={active} className="mt-8 justify-center md:hidden" />
+
+        <div
+          onScroll={handleScroll}
+          className="-mx-6 mt-10 flex snap-x snap-mandatory scroll-px-6 gap-5 overflow-x-auto px-6 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:hidden"
+        >
+          {items.map((it, index) => (
+            <div
+              key={`mobile-gallery-${index}`}
+              data-snap-item
+              className="group relative w-[78vw] shrink-0 snap-center overflow-hidden rounded-[3px] first:snap-start sm:w-[56vw]"
+            >
+              <Figure
+                src={`/desserts/gallery-${index + 1}.png`}
+                alt={galleryCaptions[index % galleryCaptions.length]}
+                tone={it.tone}
+                ratio={it.ratio}
+                label={galleryCaptions[index % galleryCaptions.length]}
+              />
+              <span className="absolute bottom-3 left-3 rounded-full bg-ink/70 px-3 py-1 text-[10px] uppercase tracking-[0.12em] text-cream/90 backdrop-blur-sm">
+                {galleryCaptions[index % galleryCaptions.length]}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-16 hidden grid-cols-2 gap-4 md:grid md:grid-cols-3 md:gap-6">
           {cols.map((colItems, ci) => (
             <div
               key={ci}
@@ -70,6 +101,8 @@ export default function Gallery() {
                   className="group relative overflow-hidden rounded-[3px]"
                 >
                   <Figure
+                    src={`/desserts/gallery-${ci * 2 + idx + 1}.png`}
+                    alt={galleryCaptions[(ci * 2 + idx) % galleryCaptions.length]}
                     tone={it.tone}
                     ratio={it.ratio}
                     label={galleryCaptions[(ci * 2 + idx) % galleryCaptions.length]}

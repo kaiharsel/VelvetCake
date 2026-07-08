@@ -5,7 +5,7 @@ import SocialLink from '../ui/SocialLink'
 
 export default function Footer() {
   return (
-    <footer className="relative overflow-hidden border-t border-cream/10 bg-ink pt-20">
+    <footer className="safe-area-bottom relative overflow-hidden border-t border-cream/10 bg-ink pt-20">
       <div className="container-shell">
         <div className="grid gap-14 pb-16 md:grid-cols-12">
           {/* Brand */}

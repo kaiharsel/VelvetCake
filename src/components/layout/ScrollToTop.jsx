@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { ScrollTrigger } from '../../lib/gsap'
 import { useSmoothScroll } from './SmoothScroll'
@@ -13,6 +13,8 @@ export default function ScrollToTop() {
   const { pathname } = useLocation()
   const lenis = useSmoothScroll()
   const [visible, setVisible] = useState(false)
+  const [activating, setActivating] = useState(false)
+  const timer = useRef(null)
 
   useLayoutEffect(() => {
     if ('scrollRestoration' in window.history) {
@@ -40,13 +42,36 @@ export default function ScrollToTop() {
     return () => window.removeEventListener('scroll', updateVisibility)
   }, [])
 
+  useEffect(() => () => clearTimeout(timer.current), [])
+
   const toTop = () =>
     lenis ? lenis.scrollTo(0) : window.scrollTo({ top: 0, behavior: 'smooth' })
 
+  const handleToTop = () => {
+    const isMobile =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(max-width: 767px)').matches
+
+    if (!isMobile) {
+      toTop()
+      return
+    }
+
+    clearTimeout(timer.current)
+    setActivating(true)
+    toTop()
+
+    timer.current = window.setTimeout(() => {
+      setActivating(false)
+    }, 450)
+  }
+
   return (
     <IconButton
-      onClick={toTop}
+      onClick={handleToTop}
       aria-label="Прокрутити нагору"
+      aria-busy={activating || undefined}
+      data-active={activating || undefined}
       size="lg"
       className={`fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] right-5 z-30 ${
         visible

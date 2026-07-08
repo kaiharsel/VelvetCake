@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
-const delay = 1000
+const delay = 500
 
 const isMobilePrimaryClick = (event) =>
   typeof window !== 'undefined' &&

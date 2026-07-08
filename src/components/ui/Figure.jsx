@@ -27,13 +27,12 @@ const toneStyles = {
  * Image with a graceful, on-brand placeholder fallback.
  *
  * Pass `src` once real photography is ready (drop files in /public/desserts).
- * Until then a styled velvet block with the VC monogram + `label` renders,
- * keeping layout and mood intact. `ratio` is any CSS aspect-ratio string.
+ * Until then a styled velvet block renders, keeping layout and mood intact.
+ * `ratio` is any CSS aspect-ratio string.
  */
 export default function Figure({
   src,
   alt = '',
-  label,
   ratio = '4 / 5',
   tone = 'wine',
   className = '',
@@ -59,22 +58,6 @@ export default function Figure({
           className="absolute inset-3 rounded-[2px]"
           style={{ boxShadow: `inset 0 0 0 1px ${t.ring}` }}
         />
-        <div className="flex flex-col items-center gap-3 px-6 text-center">
-          <span
-            className="font-display text-4xl italic leading-none md:text-5xl"
-            style={{ color: t.mono }}
-          >
-            VC
-          </span>
-          {label && (
-            <span
-              className="font-sans text-[10px] uppercase tracking-label"
-              style={{ color: t.mono, opacity: 0.72 }}
-            >
-              {label}
-            </span>
-          )}
-        </div>
       </div>
 
       {src && (

@@ -5,7 +5,13 @@ import { gsap, prefersReducedMotion } from '../../lib/gsap'
  * Word-by-word opacity fill driven by scroll progress — the signature
  * editorial "statement" effect. Muted words brighten to cream as they pass.
  */
-export default function ScrollText({ text, className = '' }) {
+export default function ScrollText({
+  text,
+  className = '',
+  mobileStart = 'top 90%',
+  desktopStart = 'top 78%',
+  desktopEnd = 'bottom 60%',
+}) {
   const ref = useRef(null)
   const words = text.split(' ')
 
@@ -20,21 +26,39 @@ export default function ScrollText({ text, className = '' }) {
     }
 
     const ctx = gsap.context(() => {
+      const isMobile = window.matchMedia('(max-width: 767px)').matches
+
       gsap.set(spans, { opacity: 0.16 })
+
+      if (isMobile) {
+        gsap.to(spans, {
+          opacity: 1,
+          duration: 1.1,
+          ease: 'power2.out',
+          stagger: 0.026,
+          scrollTrigger: {
+            trigger: el,
+            start: mobileStart,
+            once: true,
+          },
+        })
+        return
+      }
+
       gsap.to(spans, {
         opacity: 1,
         ease: 'none',
         stagger: 0.5,
         scrollTrigger: {
           trigger: el,
-          start: 'top 78%',
-          end: 'bottom 60%',
+          start: desktopStart,
+          end: desktopEnd,
           scrub: true,
         },
       })
     }, el)
     return () => ctx.revert()
-  }, [text])
+  }, [desktopEnd, desktopStart, mobileStart, text])
 
   return (
     <p ref={ref} className={className}>

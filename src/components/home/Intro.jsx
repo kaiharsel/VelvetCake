@@ -17,6 +17,9 @@ export default function Intro() {
             <ScrollText
               text="Для мене кондитерське мистецтво є проявом любові. Солодощі створюють маленьке свято, а десерти дарують людям радість і роблять їх трішки щасливішими"
               className="display-lg max-w-4xl text-balance font-display text-cream"
+              mobileStart="top 68%"
+              desktopStart="top 66%"
+              desktopEnd="bottom 48%"
             />
 
             <Reveal

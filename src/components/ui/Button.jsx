@@ -3,9 +3,9 @@ import { Link, useNavigate } from 'react-router-dom'
 import ChevronRight from './ChevronRight'
 
 const base =
-  'group relative inline-flex items-center justify-center gap-3 rounded-full font-sans text-[13px] font-semibold uppercase tracking-[0.14em] transition-[transform,background-color,border-color,color] duration-300 ease-velvet focus-ring'
+  'group relative inline-flex items-center justify-center gap-3 rounded-full font-sans text-[13px] font-semibold uppercase tracking-[0.14em] transition-[transform,background-color,border-color,color] duration-300 ease-velvet focus-ring disabled:pointer-events-none disabled:opacity-60'
 
-const mobileActionDelay = 1000
+const mobileActionDelay = 500
 
 const shouldDelayAction = (event, target) =>
   typeof window !== 'undefined' &&

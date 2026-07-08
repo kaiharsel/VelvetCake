@@ -23,6 +23,8 @@ export default function CtaSection({
     if (prefersReducedMotion) return
     const el = root.current
     if (!el) return
+    if (!window.matchMedia('(min-width: 768px)').matches) return
+
     const ctx = gsap.context(() => {
       gsap.to(el.querySelector('[data-cta-img]'), {
         scale: 1.15,
@@ -37,7 +39,14 @@ export default function CtaSection({
     <section ref={root} className="relative flex min-h-[80svh] items-center overflow-hidden">
       <div className="absolute inset-0">
         <div data-cta-img className="h-full w-full">
-          <Figure tone="wine" ratio="auto" className="h-full w-full" label="CTA" />
+          <Figure
+            src="/desserts/cta-home.png"
+            alt="Десерт VelvetCake"
+            tone="wine"
+            ratio="auto"
+            className="h-full w-full"
+            label="CTA"
+          />
         </div>
         <div className="absolute inset-0 bg-ink/70" />
         <div className="absolute inset-0 bg-gradient-to-t from-ink via-transparent to-ink/60" />
@@ -48,7 +57,7 @@ export default function CtaSection({
           {title}
         </h2>
         <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
-          <Button to={primary.to} variant="primary" size="lg">
+          <Button to={primary.to} href={primary.href} target={primary.target} variant="primary" size="lg">
             {primary.label}
           </Button>
           {secondary && (

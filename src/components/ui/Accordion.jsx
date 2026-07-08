@@ -11,7 +11,7 @@ function Item({ q, a, isOpen, onToggle, index }) {
           aria-expanded={isOpen}
           className="focus-ring grid w-full grid-cols-[auto_1fr_auto] items-center gap-4 py-8 text-left md:grid-cols-12 md:gap-6"
         >
-          <span className="font-display text-2xl text-blood/40 md:col-span-1">
+          <span className="font-display text-4xl leading-none text-blood/40 md:col-span-1">
             {String(index + 1).padStart(2, '0')}
           </span>
           <span
