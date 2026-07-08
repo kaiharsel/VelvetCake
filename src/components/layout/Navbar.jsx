@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { nav, site } from '../../data/site'
+import SocialLink from '../ui/SocialLink'
+import Button from '../ui/Button'
 import { useSmoothScroll } from './SmoothScroll'
 import BrandMark from '../ui/BrandMark'
 
@@ -10,10 +12,10 @@ function Logo({ onClick }) {
     <Link
       to="/"
       onClick={onClick}
-      aria-label={`${site.name} — головна`}
+      aria-label={`${site.name}, головна`}
       className="focus-ring group flex items-center gap-2.5"
     >
-      <BrandMark className="h-8 w-8 transition-transform duration-500 ease-velvet group-hover:-translate-y-0.5 md:h-9 md:w-9" />
+      <BrandMark className="h-7 w-auto shrink-0 -translate-y-0.5 object-contain md:h-8" />
       <span className="flex items-baseline gap-[2px]">
         <span className="font-display text-2xl leading-none tracking-tight text-cream md:text-[26px]">
           Velvet
@@ -52,13 +54,13 @@ export default function Navbar() {
   return (
     <>
       <header
-        className={`fixed inset-x-0 top-0 z-50 transition-colors duration-500 ease-velvet ${
+        className={`safe-area-top fixed inset-x-0 top-0 z-50 transition-colors duration-500 ease-velvet ${
           scrolled || open
             ? 'border-b border-cream/10 bg-ink/80 backdrop-blur-md'
             : 'border-b border-transparent'
         }`}
       >
-        <div className="container-shell flex h-[68px] items-center justify-between md:h-[76px]">
+        <div className="container-shell safe-area-inline flex h-[68px] items-center justify-between md:h-[76px]">
           <Logo />
 
           <nav className="hidden items-center gap-9 md:flex" aria-label="Головна навігація">
@@ -76,7 +78,7 @@ export default function Navbar() {
                   <>
                     {item.label}
                     {isActive && (
-                      <span className="absolute -bottom-1.5 left-0 h-px w-full bg-blood-400" />
+                      <span className="absolute -bottom-2 left-1/2 h-[2px] w-5 -translate-x-1/2 rounded-full bg-blood-400" />
                     )}
                   </>
                 )}
@@ -85,12 +87,14 @@ export default function Navbar() {
           </nav>
 
           <div className="flex items-center gap-4">
-            <Link
+            <Button
               to="/menu"
-              className="focus-ring hidden rounded-full bg-blood px-6 py-2.5 font-sans text-[12px] font-semibold uppercase tracking-[0.14em] text-cream transition-colors duration-500 hover:bg-blood-400 md:inline-flex"
+              size="sm"
+              arrow={false}
+              className="hidden md:inline-flex"
             >
               Замовити
-            </Link>
+            </Button>
 
             <button
               type="button"
@@ -122,45 +126,58 @@ export default function Navbar() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4 }}
-            className="fixed inset-0 z-40 bg-ink md:hidden"
+            className="fixed inset-0 z-40 h-[100dvh] overflow-hidden bg-ink md:hidden"
           >
-            <div className="container-shell flex h-full flex-col justify-center gap-2 pt-20">
-              {nav.map((item, i) => (
-                <motion.div
-                  key={item.to}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 + i * 0.08, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  <NavLink
-                    to={item.to}
-                    className="block border-b border-cream/10 py-5 font-display text-4xl text-cream"
+            <div
+              data-lenis-prevent
+              style={{ WebkitOverflowScrolling: 'touch' }}
+              className="container-shell safe-area-inline burger-menu-scroll h-full touch-pan-y overflow-y-auto overscroll-contain"
+            >
+              <div className="flex min-h-full flex-col justify-center gap-2 py-4">
+              <div className="burger-nav-offset flex flex-col gap-2">
+                {nav.map((item, i) => (
+                  <motion.div
+                    key={item.to}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 + i * 0.08, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                   >
-                    {item.label}
-                  </NavLink>
-                </motion.div>
-              ))}
+                    <NavLink
+                      to={item.to}
+                      className="burger-menu-link block border-b border-cream/10 py-5 font-display text-4xl text-cream"
+                    >
+                      {item.label}
+                    </NavLink>
+                  </motion.div>
+                ))}
+              </div>
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 + nav.length * 0.08, duration: 0.5 }}
-                className="mt-8 flex flex-col gap-5 text-mute"
+                className="burger-menu-contacts mt-8 flex flex-col gap-5 text-mute"
               >
                 <div className="flex flex-col gap-1">
                   <a href={site.phoneHref} className="py-1 text-lg text-cream">
                     {site.phone}
                   </a>
-                  <a href={site.emailHref} className="py-1 text-sm">
-                    {site.email}
-                  </a>
                 </div>
-                <NavLink
+                <div className="grid gap-2">
+                  {site.socials.map((social) => (
+                    <SocialLink key={social.label} social={social} className="w-full" />
+                  ))}
+                </div>
+                <Button
                   to="/menu"
-                  className="focus-ring inline-flex w-full items-center justify-center rounded-full bg-blood px-6 py-4 font-sans text-[13px] font-semibold uppercase tracking-[0.14em] text-cream"
+                  size="lg"
+                  arrow={false}
+                  className="w-full"
+                  onClick={() => setOpen(false)}
                 >
                   Замовити
-                </NavLink>
+                </Button>
               </motion.div>
+              </div>
             </div>
           </motion.div>
         )}

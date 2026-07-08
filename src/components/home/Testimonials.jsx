@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { testimonials } from '../../data/content'
+import ChevronRight from '../ui/ChevronRight'
 
 export default function Testimonials() {
   const [i, setI] = useState(0)
@@ -61,9 +62,9 @@ export default function Testimonials() {
               type="button"
               onClick={() => go(-1)}
               aria-label="Попередній відгук"
-              className="focus-ring flex h-12 w-12 items-center justify-center rounded-full border border-cream/25 text-2xl leading-none text-cream transition-colors hover:border-cream hover:bg-cream hover:text-ink"
+              className="focus-ring flex h-12 w-12 items-center justify-center rounded-full border border-cream/25 bg-ink/35 text-2xl leading-none text-cream transition-colors hover:border-blood-400 hover:bg-blood/25"
             >
-              ←
+              <ChevronRight className="rotate-180" />
             </button>
             <div className="flex gap-2">
               {testimonials.map((_, idx) => (
@@ -82,9 +83,9 @@ export default function Testimonials() {
               type="button"
               onClick={() => go(1)}
               aria-label="Наступний відгук"
-              className="focus-ring flex h-12 w-12 items-center justify-center rounded-full border border-cream/25 text-2xl leading-none text-cream transition-colors hover:border-cream hover:bg-cream hover:text-ink"
+              className="focus-ring flex h-12 w-12 items-center justify-center rounded-full border border-cream/25 bg-ink/35 text-2xl leading-none text-cream transition-colors hover:border-blood-400 hover:bg-blood/25"
             >
-              →
+              <ChevronRight />
             </button>
           </div>
         </div>

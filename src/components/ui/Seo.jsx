@@ -7,7 +7,7 @@ import { site } from '../../data/site'
  */
 export default function Seo({ title, description, path = '' }) {
   useEffect(() => {
-    const fullTitle = title ? `${title} — ${site.name}` : `${site.name} — ${site.tagline}`
+    const fullTitle = title ? `${title} | ${site.name}` : `${site.name} | ${site.tagline}`
     document.title = fullTitle
 
     const setMeta = (selector, attr, value) => {

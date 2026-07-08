@@ -29,7 +29,7 @@ export default function MasterclassTeaser() {
             <div data-mc-img className="scale-110">
               <Figure tone="wine" ratio="4 / 5" label="Майстер-клас" />
             </div>
-            <div className="absolute bottom-5 left-5 rounded-full bg-cream px-5 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink">
+            <div className="absolute bottom-5 left-5 rounded-full border border-cream/15 bg-ink/85 px-5 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-cream/85 shadow-[0_10px_28px_rgba(0,0,0,0.28)] backdrop-blur-md">
               6–12 у групі
             </div>
           </div>
@@ -39,10 +39,10 @@ export default function MasterclassTeaser() {
               Створи свій <span className="italic text-blood-400">бенто-торт</span>
             </h2>
             <p className="mt-6 max-w-md text-pretty leading-relaxed text-mute md:text-lg" data-reveal>
-              Створи свій перший бенто-торт у приємній компанії — навіть без
-              досвіду. Ми працюємо в невеликих групах і крок за кроком допомагаємо
+              Створи свій перший бенто-торт у приємній компанії. Попередній
+              досвід не потрібен. Ми працюємо в невеликих групах і допомагаємо
               на кожному етапі. У результаті ти забереш із собою власний торт і
-              круті емоції.
+              круті емоції
             </p>
             <ul className="mt-8 space-y-3 text-cream/80" data-reveal>
               {['Невеликі дружні групи', 'Навіть без досвіду', 'Забираєш торт із собою'].map(

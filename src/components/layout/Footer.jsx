@@ -1,13 +1,9 @@
 import { Link } from 'react-router-dom'
 import { nav, site } from '../../data/site'
-import { useSmoothScroll } from './SmoothScroll'
 import BrandMark from '../ui/BrandMark'
+import SocialLink from '../ui/SocialLink'
 
 export default function Footer() {
-  const lenis = useSmoothScroll()
-  const toTop = () =>
-    lenis ? lenis.scrollTo(0) : window.scrollTo({ top: 0, behavior: 'smooth' })
-
   return (
     <footer className="relative overflow-hidden border-t border-cream/10 bg-ink pt-20">
       <div className="container-shell">
@@ -15,7 +11,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="md:col-span-5">
             <div className="flex items-center gap-3">
-              <BrandMark className="h-11 w-11" />
+              <BrandMark className="h-10 w-auto shrink-0 object-contain md:h-11" />
               <div className="flex items-baseline gap-[2px]">
                 <span className="font-display text-4xl text-cream">Velvet</span>
                 <span className="font-display text-4xl italic text-gold-300">Cake</span>
@@ -23,7 +19,7 @@ export default function Footer() {
             </div>
             <p className="mt-6 max-w-sm text-pretty leading-relaxed text-mute">
               Авторська кондитерська темного люксу. Драматичні торти й десерти
-              ручної роботи з {site.founded} року.
+              ручної роботи з {site.founded} року
             </p>
             <a
               href={site.mapHref}
@@ -72,14 +68,11 @@ export default function Footer() {
                   {site.phone}
                 </a>
               </li>
-              <li>
-                <a
-                  href={site.emailHref}
-                  className="focus-ring text-cream/80 transition-colors hover:text-blood-400"
-                >
-                  {site.email}
-                </a>
-              </li>
+              {site.socials.map((social) => (
+                <li key={social.label}>
+                  <SocialLink social={social} className="w-full" />
+                </li>
+              ))}
             </ul>
 
             <h4 className="eyebrow mb-4 mt-8">Графік роботи</h4>
@@ -92,46 +85,16 @@ export default function Footer() {
               ))}
             </ul>
 
-            <div className="mt-8 flex flex-wrap gap-4">
-              {site.socials.map((s) => (
-                <a
-                  key={s.label}
-                  href={s.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="focus-ring rounded-full border border-cream/20 px-4 py-2 text-xs uppercase tracking-[0.14em] text-cream/80 transition-colors hover:border-blood-400 hover:text-blood-400"
-                >
-                  {s.label}
-                </a>
-              ))}
-            </div>
           </div>
         </div>
 
         {/* Oversized wordmark */}
-        <button
-          type="button"
-          onClick={toTop}
-          aria-label="Нагору"
-          className="focus-ring group block w-full select-none border-t border-cream/10 pt-10 text-center"
-        >
-          <span className="block font-display text-[18vw] leading-none text-cream/[0.07] transition-colors duration-700 group-hover:text-blood/20">
+        <div className="block w-full select-none pb-8 pt-4 text-center md:border-t md:border-cream/10 md:pb-0 md:pt-10">
+          <span className="block font-display text-[18vw] leading-none text-cream/[0.07]">
             VelvetCake
           </span>
-        </button>
-
-        <div className="flex flex-col items-center justify-between gap-3 py-8 text-xs text-mute md:flex-row">
-          <p>
-            © {new Date().getFullYear()} {site.name}. Усі права захищено.
-          </p>
-          <button
-            type="button"
-            onClick={toTop}
-            className="focus-ring uppercase tracking-[0.14em] transition-colors hover:text-cream"
-          >
-            Нагору <span className="inline-block text-[1.4em] leading-none align-middle">↑</span>
-          </button>
         </div>
+
       </div>
     </footer>
   )

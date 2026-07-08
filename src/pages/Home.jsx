@@ -7,7 +7,6 @@ import Categories from '../components/home/Categories'
 import Advantages from '../components/home/Advantages'
 import Gallery from '../components/home/Gallery'
 import MasterclassTeaser from '../components/home/MasterclassTeaser'
-import Testimonials from '../components/home/Testimonials'
 import FaqSection from '../components/shared/FaqSection'
 import CtaSection from '../components/shared/CtaSection'
 import { faq } from '../data/content'
@@ -28,7 +27,7 @@ export default function Home() {
     <>
       <Seo
         title=""
-        description="VelvetCake (Львів) — авторська кондитерська. Торти, капкейки, бенто, кенді бар та майстер-класи ручної роботи. Швидке замовлення по тел. 093 106 79 43."
+        description="VelvetCake у Львові. Авторська кондитерська з тортами, капкейками, бенто, кенді-барами та майстер-класами ручної роботи. Швидке замовлення за телефоном 093 106 79 43"
         path="/"
       />
       <Hero />
@@ -43,7 +42,6 @@ export default function Home() {
       <Advantages />
       <Gallery />
       <MasterclassTeaser />
-      <Testimonials />
       <FaqSection items={faq} />
       <CtaSection />
     </>

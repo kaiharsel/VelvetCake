@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { site } from '../../data/site'
+import Button from '../ui/Button'
+import IconButton from '../ui/IconButton'
+import { useSmoothScroll } from '../layout/SmoothScroll'
 
 /**
  * Accessible order-request modal. Front-end only: on submit it shows a
@@ -8,17 +11,36 @@ import { site } from '../../data/site'
  */
 export default function OrderDialog({ open, onClose, product }) {
   const [sent, setSent] = useState(false)
+  const lenis = useSmoothScroll()
 
   useEffect(() => {
     if (!open) return
     const onKey = (e) => e.key === 'Escape' && onClose()
+    const scrollY = window.scrollY
+    const originalStyles = {
+      position: document.body.style.position,
+      top: document.body.style.top,
+      width: document.body.style.width,
+      overflow: document.body.style.overflow,
+    }
+
     document.addEventListener('keydown', onKey)
+    lenis?.stop()
+    document.body.style.position = 'fixed'
+    document.body.style.top = `-${scrollY}px`
+    document.body.style.width = '100%'
     document.body.style.overflow = 'hidden'
+
     return () => {
       document.removeEventListener('keydown', onKey)
-      document.body.style.overflow = ''
+      document.body.style.position = originalStyles.position
+      document.body.style.top = originalStyles.top
+      document.body.style.width = originalStyles.width
+      document.body.style.overflow = originalStyles.overflow
+      window.scrollTo({ top: scrollY, left: 0, behavior: 'auto' })
+      lenis?.start()
     }
-  }, [open, onClose])
+  }, [open, onClose, lenis])
 
   useEffect(() => {
     if (!open) setSent(false)
@@ -34,7 +56,7 @@ export default function OrderDialog({ open, onClose, product }) {
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-[80] grid place-items-center p-4"
+          className="fixed inset-0 z-[80] flex h-[100dvh] items-center justify-center overflow-hidden px-3 py-[max(0.75rem,env(safe-area-inset-top,0px))]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -49,42 +71,50 @@ export default function OrderDialog({ open, onClose, product }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.98 }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-full max-w-lg overflow-hidden rounded-lg border border-cream/15 bg-ink-800 p-8 md:p-10"
+            className="relative flex max-h-full min-h-0 w-full max-w-lg overflow-hidden rounded-lg border border-cream/15 bg-ink-800"
           >
-            <button
-              type="button"
+            <IconButton
               onClick={onClose}
               aria-label="Закрити"
-              className="focus-ring absolute right-5 top-5 text-2xl text-mute transition-colors hover:text-cream"
+              size="sm"
+              className="absolute right-3 top-3 z-20 text-mute md:right-5 md:top-5 md:hover:text-cream"
             >
-              ×
-            </button>
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
+                <path d="m6 6 12 12M18 6 6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+            </IconButton>
 
+            <div
+              data-lenis-prevent
+              style={{ WebkitOverflowScrolling: 'touch' }}
+              className="min-h-0 w-full flex-1 touch-pan-y overflow-y-auto overscroll-contain p-5 pt-16 [scrollbar-width:thin] sm:p-8 sm:pt-16 md:p-10 md:pt-16"
+            >
             {sent ? (
-              <div className="py-8 text-center">
+              <div className="flex min-h-[22rem] flex-col items-center justify-center py-6 text-center">
                 <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-blood text-2xl text-cream">
                   ✓
                 </div>
                 <h2 className="font-display text-3xl text-cream">Дякуємо!</h2>
-                <p className="mt-4 text-mute">
+                <p className="mt-4 max-w-sm text-pretty text-mute">
                   Ми отримали заявку{product ? ` на «${product}»` : ''} і звʼяжемось
-                  з вами протягом години в робочий час.
+                  з вами протягом години в робочий час
                 </p>
-                <button
-                  type="button"
+                <Button
                   onClick={onClose}
-                  className="focus-ring mt-8 rounded-full bg-cream px-7 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-ink transition-colors hover:bg-ember hover:text-cream"
+                  variant="outline"
+                  arrow={false}
+                  className="mt-8"
                 >
                   Закрити
-                </button>
+                </Button>
               </div>
             ) : (
               <>
-                <h2 className="font-display text-3xl text-cream">
+                <h2 className="pr-10 font-display text-3xl text-cream">
                   {product ? `Замовити «${product}»` : 'Залишити заявку'}
                 </h2>
                 <p className="mt-3 text-sm text-mute">
-                  Заповніть форму — ми уточнимо деталі та підтвердимо замовлення.
+                  Заповніть форму. Ми уточнимо деталі та підтвердимо замовлення
                 </p>
 
                 <form onSubmit={handleSubmit} className="mt-7 space-y-4">
@@ -118,12 +148,14 @@ export default function OrderDialog({ open, onClose, product }) {
                     />
                   </div>
 
-                  <button
+                  <Button
                     type="submit"
-                    className="focus-ring w-full rounded-full bg-blood py-4 text-sm font-semibold uppercase tracking-[0.14em] text-cream transition-colors hover:bg-blood-400"
+                    size="lg"
+                    arrow={false}
+                    className="w-full"
                   >
                     Надіслати заявку
-                  </button>
+                  </Button>
                   <p className="text-center text-xs text-mute">
                     або зателефонуйте{' '}
                     <a href={site.phoneHref} className="text-blood-400 hover:underline">
@@ -133,6 +165,7 @@ export default function OrderDialog({ open, onClose, product }) {
                 </form>
               </>
             )}
+            </div>
           </motion.div>
         </motion.div>
       )}
@@ -153,7 +186,11 @@ function Field({ label, name, type = 'text', ...rest }) {
         id={`ord-${name}`}
         name={name}
         type={type}
-        className="focus-ring w-full rounded-md border border-cream/20 bg-ink px-4 py-3 text-cream placeholder:text-mute focus:border-cream/50"
+        className={`focus-ring min-w-0 w-full rounded-md border border-cream/20 bg-ink px-4 py-3 text-base text-cream placeholder:text-mute focus:border-cream/50 ${
+          type === 'date'
+            ? 'block h-12 min-h-12 max-w-full appearance-none overflow-hidden py-0 leading-normal'
+            : ''
+        }`}
         {...rest}
       />
     </div>

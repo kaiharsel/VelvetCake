@@ -3,6 +3,11 @@ import Seo from '../components/ui/Seo'
 import Figure from '../components/ui/Figure'
 import Reveal from '../components/ui/Reveal'
 import SectionHeading from '../components/ui/SectionHeading'
+import ChevronRight from '../components/ui/ChevronRight'
+import SocialLink from '../components/ui/SocialLink'
+import Button from '../components/ui/Button'
+import DelayedButton from '../components/ui/DelayedButton'
+import ScrollText from '../components/ui/ScrollText'
 import FaqSection from '../components/shared/FaqSection'
 import {
   masterclasses,
@@ -13,7 +18,7 @@ import {
 import { site } from '../data/site'
 import { gsap, prefersReducedMotion } from '../lib/gsap'
 
-const fmt = (p) => new Intl.NumberFormat('uk-UA').format(p)
+const fmt = (p) => String(p)
 
 export default function Masterclasses() {
   const heroRef = useRef(null)
@@ -47,7 +52,7 @@ export default function Masterclasses() {
     <>
       <Seo
         title="Майстер-класи"
-        description="Майстер-класи VelvetCake: дзеркальна глазур, авторські торти, тарти та макарони. Для будь-якого рівня. Забронюйте місце онлайн."
+        description="Майстер-класи VelvetCake: дзеркальна глазур, авторські торти, тарти та макарони. Для будь-якого рівня. Забронюйте місце онлайн"
         path="/masterclasses"
       />
 
@@ -72,11 +77,11 @@ export default function Masterclasses() {
           </h1>
           <p data-mh-fade className="mt-8 max-w-lg text-pretty text-cream/80 md:text-lg">
             Невелика дружня група, два теплі вечірні години та готовий торт у
-            ваших руках. Кожен самостійно збирає й оформлює свій бенто — у тій
-            темі, що подобається саме вам.
+            ваших руках. Кожен самостійно збирає й оформлює свій бенто у
+            вибраній темі
           </p>
           <div data-mh-fade className="mt-10 flex flex-wrap gap-3">
-            {['Навіть без досвіду', 'Усе включено', '6–12 у групі', '1,5–2 год · 1500 грн'].map((t) => (
+            {['Навіть без досвіду', 'Усе включено', '6–12 у групі', '1,5–2 год за 1500 грн'].map((t) => (
               <span
                 key={t}
                 className="rounded-full border border-cream/25 px-4 py-2 text-xs uppercase tracking-[0.12em] text-cream/80"
@@ -91,23 +96,23 @@ export default function Masterclasses() {
       {/* Intro */}
       <section className="bg-ink py-24 md:py-32">
         <div className="container-shell">
-          <p className="display-lg max-w-4xl text-balance font-display text-cream">
-            Маленьке свято в студії: тісне коло, шість пар рук у борошні, теплі
-            лампи і ритуал оформлення останнього шару крему.
-          </p>
+          <ScrollText
+            text="Маленьке свято в студії: тісне коло, шість пар рук у борошні, теплі лампи і ритуал оформлення останнього шару крему"
+            className="display-lg max-w-4xl text-balance font-display text-cream"
+          />
         </div>
       </section>
 
       {/* List of classes */}
-      <section className="bg-ink-800 py-24 md:py-32">
+      <section className="mobile-reveal-static bg-ink-800 py-24 md:py-32">
         <div className="container-shell">
           <SectionHeading
             title={<>Оберіть свою <span className="italic text-blood-400">тему</span></>}
-            lede="П'ять напрямків оформлення. Іменинник або іменинниця обирає смак, начинку та тему — решта групи разом збирає тортики в тому ж стилі."
+            lede="П'ять напрямків оформлення. Іменинник або іменинниця обирає смак, начинку та тему. Решта групи разом збирає тортики в тому ж стилі"
           />
           <Reveal className="mt-14 flex flex-col" stagger={0.08} y={40}>
             {masterclasses.map((mc, i) => (
-              <button
+              <DelayedButton
                 key={mc.slug}
                 type="button"
                 data-reveal
@@ -115,28 +120,28 @@ export default function Masterclasses() {
                   setSelected(mc.slug)
                   document.getElementById('booking')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
                 }}
-                className="group grid grid-cols-1 items-center gap-4 border-t border-cream/10 py-8 text-left transition-colors last:border-b hover:bg-cream/[0.03] md:grid-cols-12 md:gap-6"
+                className="group grid grid-cols-1 items-center gap-4 border-t border-cream/10 py-8 text-left transition-all duration-500 active:scale-[0.99] data-[pending=true]:scale-[0.99] data-[pending=true]:bg-cream/[0.03] last:border-b md:grid-cols-12 md:gap-6 md:hover:bg-cream/[0.03]"
               >
                 <span className="font-display text-2xl text-blood/40 md:col-span-1">
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <div className="md:col-span-5">
-                  <h3 className="font-display text-3xl text-cream transition-colors group-hover:text-blood-400 md:text-4xl">
+                  <h3 className="font-display text-3xl text-cream transition-colors md:text-4xl md:group-hover:text-blood-400">
                     {mc.title}
                   </h3>
                   <p className="mt-2 max-w-md text-sm text-mute">{mc.text}</p>
                 </div>
                 <div className="text-sm text-cream/80 md:col-span-2">{mc.level}</div>
                 <div className="text-sm text-cream/80 md:col-span-2">
-                  {mc.duration} · {mc.seats} місць
+                  {mc.duration}, {mc.seats} місць
                 </div>
                 <div className="flex items-center justify-between gap-4 md:col-span-2 md:justify-end">
-                  <span className="font-display text-2xl text-cream">
+                  <span className="price-display text-2xl font-semibold tracking-tight text-cream">
                     {fmt(mc.price)}<span className="ml-1 text-sm text-mute">грн</span>
                   </span>
-                  <span className="inline-block text-[1.5em] leading-none text-blood-400 transition-transform group-hover:translate-x-1">→</span>
+                  <ChevronRight className="text-blood-400 transition-transform md:group-hover:translate-x-1" />
                 </div>
-              </button>
+              </DelayedButton>
             ))}
           </Reveal>
         </div>
@@ -153,7 +158,7 @@ export default function Masterclasses() {
               <div
                 key={a.title}
                 data-reveal
-                className="rounded-[4px] border border-cream/10 bg-cream/[0.02] p-7 transition-colors hover:border-blood-400/50"
+                className="rounded-[4px] border border-cream/10 bg-cream/[0.02] p-7 transition-colors md:hover:border-blood-400/50"
               >
                 <h3 className="font-display text-2xl text-cream">{a.title}</h3>
                 <p className="mt-3 text-sm leading-relaxed text-mute">{a.text}</p>
@@ -212,15 +217,17 @@ export default function Masterclasses() {
           <div>
             <SectionHeading
               title={<>Забронювати <span className="italic text-blood-400">майстер-клас</span></>}
-              lede="Запишіться на найближчу дату, оберіть свою тему, а якщо це день народження — додамо сюрприз від кондитерки."
+              lede="Запишіться на найближчу дату й оберіть свою тему. Для дня народження додамо сюрприз від кондитерки"
             />
-            <div className="mt-10 space-y-3 text-cream/80">
+            <div className="mt-10 text-cream/80">
               <a href={site.phoneHref} className="focus-ring block font-display text-2xl text-cream hover:text-blood-400">
                 {site.phone}
               </a>
-              <a href={site.emailHref} className="focus-ring block hover:text-blood-400">
-                {site.email}
-              </a>
+              <div className="mt-5 flex flex-col gap-2 sm:items-start">
+                {site.socials.map((social) => (
+                  <SocialLink key={social.label} social={social} />
+                ))}
+              </div>
             </div>
           </div>
 
@@ -229,14 +236,15 @@ export default function Masterclasses() {
               <div className="py-10 text-center">
                 <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-blood text-2xl text-cream">✓</div>
                 <h3 className="font-display text-3xl text-cream">Заявку прийнято</h3>
-                <p className="mt-4 text-mute">Ми звʼяжемось з вами, щоб підтвердити дату й деталі.</p>
-                <button
-                  type="button"
+                <p className="mt-4 text-mute">Ми звʼяжемось з вами, щоб підтвердити дату й деталі</p>
+                <Button
                   onClick={() => setSent(false)}
-                  className="focus-ring mt-8 rounded-full border border-cream/30 px-6 py-3 text-sm uppercase tracking-[0.14em] text-cream hover:bg-cream hover:text-ink"
+                  variant="outline"
+                  arrow={false}
+                  className="mt-8"
                 >
                   Записати ще одного
-                </button>
+                </Button>
               </div>
             ) : (
               <form onSubmit={handleBook} className="space-y-4">
@@ -268,17 +276,19 @@ export default function Masterclasses() {
                   >
                     {masterclasses.map((mc) => (
                       <option key={mc.slug} value={mc.slug}>
-                        {mc.title} — {fmt(mc.price)} грн
+                        {mc.title}, {fmt(mc.price)} грн
                       </option>
                     ))}
                   </select>
                 </div>
-                <button
+                <Button
                   type="submit"
-                  className="focus-ring w-full rounded-full bg-blood py-4 text-sm font-semibold uppercase tracking-[0.14em] text-cream transition-colors hover:bg-blood-400"
+                  size="lg"
+                  arrow={false}
+                  className="w-full"
                 >
                   Забронювати місце
-                </button>
+                </Button>
               </form>
             )}
           </div>

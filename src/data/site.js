@@ -7,18 +7,16 @@ export const site = {
   city: 'Львів',
   phone: '093 106 79 43',
   phoneHref: 'tel:+380931067943',
-  email: 'hello@velvetcake.lviv.ua', // ← замініть на реальний e-mail за наявності
-  emailHref: 'mailto:hello@velvetcake.lviv.ua',
   address: 'Львів, Україна',
   mapHref: 'https://maps.google.com/?q=Velvet+Cake+Львів',
   hours: [
-    { day: 'Вт — Нд', time: '10:00 — 19:00' },
+    { day: 'Вт–Нд', time: '10:00–19:00' },
     { day: 'Понеділок', time: 'Вихідний' },
   ],
   socials: [
     {
       label: 'Instagram',
-      href: 'https://instagram.com/velvet_cake_lviv',
+      href: 'https://www.instagram.com/velvet_cake_lviv/',
       handle: '@velvet_cake_lviv',
     },
     {

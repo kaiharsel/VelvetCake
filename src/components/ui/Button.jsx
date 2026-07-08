@@ -1,45 +1,39 @@
-import { useRef } from 'react'
-import { Link } from 'react-router-dom'
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
-import { prefersReducedMotion } from '../../lib/gsap'
+import { useEffect, useRef, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import ChevronRight from './ChevronRight'
 
 const base =
-  'group relative inline-flex items-center justify-center gap-3 rounded-full font-sans text-[13px] font-semibold uppercase tracking-[0.14em] transition-colors duration-500 ease-velvet focus-ring'
+  'group relative inline-flex items-center justify-center gap-3 rounded-full font-sans text-[13px] font-semibold uppercase tracking-[0.14em] transition-[transform,background-color,border-color,color] duration-300 ease-velvet focus-ring'
+
+const mobileActionDelay = 1000
+
+const shouldDelayAction = (event, target) =>
+  typeof window !== 'undefined' &&
+  window.matchMedia('(max-width: 767px)').matches &&
+  target !== '_blank' &&
+  event.button === 0 &&
+  !event.metaKey &&
+  !event.ctrlKey &&
+  !event.shiftKey &&
+  !event.altKey
 
 const sizes = {
+  sm: 'px-6 py-2.5 text-[12px]',
   md: 'px-7 py-3.5',
   lg: 'px-9 py-4',
 }
 
 const variants = {
-  primary: 'bg-blood text-cream hover:bg-blood-400',
+  primary: 'bg-blood text-cream md:hover:bg-blood-400',
   outline:
-    'border border-cream/30 text-cream hover:border-cream hover:bg-cream hover:text-ink',
-  ghost: 'text-cream hover:text-ember',
-  light: 'bg-cream text-ink hover:bg-ember hover:text-cream',
-}
-
-function Arrow() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="h-[1.35em] w-[1.35em] transition-transform duration-500 ease-velvet group-hover:translate-x-1"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="M5 12h14M13 6l6 6-6 6"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
+    'border border-cream/25 bg-ink/35 text-cream backdrop-blur-sm md:hover:border-blood-400 md:hover:bg-blood/25',
+  ghost: 'text-cream md:hover:text-ember',
+  light:
+    'border border-cream/20 bg-ink-800 text-cream shadow-[0_12px_32px_rgba(0,0,0,0.28)] md:hover:border-blood-400 md:hover:bg-blood',
 }
 
 /**
- * Polymorphic, magnetic call-to-action.
+ * Polymorphic call-to-action.
  * Renders a router <Link> (`to`), an <a> (`href`) or a <button>.
  */
 export default function Button({
@@ -49,72 +43,109 @@ export default function Button({
   variant = 'primary',
   size = 'md',
   arrow = true,
-  magnetic = true,
   className = '',
+  onClick,
+  type = 'button',
+  target,
   ...rest
 }) {
-  const ref = useRef(null)
-  const x = useMotionValue(0)
-  const y = useMotionValue(0)
-  const sx = useSpring(x, { stiffness: 200, damping: 15, mass: 0.4 })
-  const sy = useSpring(y, { stiffness: 200, damping: 15, mass: 0.4 })
-  const tx = useTransform(sx, (v) => v)
-  const ty = useTransform(sy, (v) => v)
+  const navigate = useNavigate()
+  const timer = useRef(null)
+  const [activating, setActivating] = useState(false)
 
-  const onMove = (e) => {
-    if (!magnetic || prefersReducedMotion || !ref.current) return
-    const r = ref.current.getBoundingClientRect()
-    x.set((e.clientX - (r.left + r.width / 2)) * 0.3)
-    y.set((e.clientY - (r.top + r.height / 2)) * 0.3)
-  }
-  const reset = () => {
-    x.set(0)
-    y.set(0)
+  useEffect(() => () => clearTimeout(timer.current), [])
+
+  const animateThen = (event, action) => {
+    if (!shouldDelayAction(event, target)) {
+      action()
+      return
+    }
+
+    event.preventDefault()
+    event.persist?.()
+    if (activating) return
+
+    setActivating(true)
+    timer.current = window.setTimeout(() => {
+      action()
+      setActivating(false)
+    }, mobileActionDelay)
   }
 
-  const cls = `${base} ${sizes[size]} ${variants[variant]} ${className}`
+  const cls = `${base} ${sizes[size]} ${variants[variant]} ${
+    activating ? 'scale-[0.96] border-blood-400 bg-blood-400' : ''
+  } ${className}`
   const inner = (
     <>
       <span>{children}</span>
-      {arrow && <Arrow />}
+      {arrow && (
+        <ChevronRight
+          className={`transition-transform duration-300 ease-velvet md:group-hover:translate-x-1 ${
+            activating ? 'translate-x-1' : ''
+          }`}
+        />
+      )}
     </>
   )
 
-  const motionProps = {
-    ref,
-    className: cls,
-    style: { x: tx, y: ty },
-    onMouseMove: onMove,
-    onMouseLeave: reset,
-    ...rest,
-  }
-
   if (to) {
     return (
-      <motion.div style={{ x: tx, y: ty }} className="inline-flex">
-        <Link
-          ref={ref}
-          to={to}
-          className={cls}
-          onMouseMove={onMove}
-          onMouseLeave={reset}
-          {...rest}
-        >
-          {inner}
-        </Link>
-      </motion.div>
+      <Link
+        to={to}
+        target={target}
+        className={cls}
+        aria-busy={activating || undefined}
+        onClick={(event) => {
+          if (!shouldDelayAction(event, target)) {
+            onClick?.(event)
+            return
+          }
+          animateThen(event, () => {
+            onClick?.(event)
+            navigate(to)
+          })
+        }}
+        {...rest}
+      >
+        {inner}
+      </Link>
     )
   }
   if (href) {
     return (
-      <motion.a href={href} {...motionProps}>
+      <a
+        href={href}
+        target={target}
+        className={cls}
+        aria-busy={activating || undefined}
+        onClick={(event) => {
+          if (!shouldDelayAction(event, target)) {
+            onClick?.(event)
+            return
+          }
+          animateThen(event, () => {
+            onClick?.(event)
+            window.location.assign(href)
+          })
+        }}
+        {...rest}
+      >
         {inner}
-      </motion.a>
+      </a>
     )
   }
   return (
-    <motion.button type="button" {...motionProps}>
+    <button
+      type={type}
+      className={cls}
+      aria-busy={activating || undefined}
+      onClick={(event) => {
+        if (type === 'submit' || !onClick) return
+        animateThen(event, () => onClick(event))
+      }}
+      {...rest}
+    >
       {inner}
-    </motion.button>
+    </button>
   )
 }

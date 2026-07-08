@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom'
 import Seo from '../components/ui/Seo'
+import Button from '../components/ui/Button'
 
 export default function NotFound() {
   return (
@@ -11,14 +11,11 @@ export default function NotFound() {
           Загубились у <span className="italic text-blood-400">темряві</span>
         </h1>
         <p className="mx-auto mt-6 max-w-md text-pretty text-cream/70">
-          Сторінки не існує або її прибрали. Повернімося туди, де смачно.
+          Сторінки не існує або її прибрали. Повернімося туди, де смачно
         </p>
-        <Link
-          to="/"
-          className="focus-ring mt-10 inline-flex items-center gap-3 rounded-full bg-blood px-8 py-4 text-sm font-semibold uppercase tracking-[0.14em] text-cream transition-colors hover:bg-blood-400"
-        >
-          На головну <span className="inline-block text-[1.4em] leading-none align-middle">→</span>
-        </Link>
+        <Button to="/" size="lg" className="mt-10">
+          На головну
+        </Button>
       </div>
     </section>
   )

@@ -22,7 +22,7 @@ export default function FaqSection({
             <div className="md:sticky md:top-32">
               <SectionHeading title={title} />
               <p className="mt-6 max-w-xs text-mute">
-                Не знайшли відповідь? Напишіть нам — відповідаємо швидко.
+                Не знайшли відповідь? Напишіть нам, і ми швидко відповімо
               </p>
             </div>
           </div>

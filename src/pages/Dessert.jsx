@@ -4,11 +4,12 @@ import Seo from '../components/ui/Seo'
 import Figure from '../components/ui/Figure'
 import Reveal from '../components/ui/Reveal'
 import DessertCard from '../components/ui/DessertCard'
+import Button from '../components/ui/Button'
 import OrderDialog from '../components/shared/OrderDialog'
 import { categories, getDessert, getRelated } from '../data/desserts'
 
 const catLabel = (id) => categories.find((c) => c.id === id)?.label || ''
-const fmtPrice = (p) => new Intl.NumberFormat('uk-UA').format(p)
+const fmtPrice = (p) => String(p)
 
 export default function Dessert() {
   const { slug } = useParams()
@@ -21,12 +22,9 @@ export default function Dessert() {
       <div className="grid min-h-[70vh] place-items-center px-6 text-center">
         <div>
           <p className="font-display text-4xl italic text-cream">Десерт не знайдено</p>
-          <Link
-            to="/menu"
-            className="focus-ring mt-8 inline-block rounded-full bg-blood px-7 py-3 text-sm uppercase tracking-[0.14em] text-cream"
-          >
+          <Button to="/menu" className="mt-8">
             До меню
-          </Link>
+          </Button>
         </div>
       </div>
     )
@@ -63,7 +61,7 @@ export default function Dessert() {
                   tone={dessert.tone}
                   ratio="4 / 5"
                   priority
-                  label={`${dessert.name} · фото ${activeImg + 1}`}
+                  label={`${dessert.name}, фото ${activeImg + 1}`}
                   // src={`/desserts/${slug}-${activeImg + 1}.jpg`}
                 />
               </div>
@@ -133,22 +131,27 @@ export default function Dessert() {
                   data-reveal
                 >
                   <div>
-                    <div className="flex items-baseline gap-2">
-                      <span className="font-display text-5xl text-cream">
+                    <div className="flex items-end gap-2 whitespace-nowrap">
+                      <span className="pb-[3px] text-xs font-semibold uppercase leading-none tracking-[0.14em] text-mute">
+                        Від
+                      </span>
+                      <span className="price-display translate-y-[5px] text-5xl font-semibold leading-none tracking-tight text-cream">
                         {fmtPrice(dessert.price)}
                       </span>
-                      <span className="text-lg text-mute">грн {dessert.unit}</span>
+                      <span className="pb-[2px] text-lg leading-none text-mute">
+                        грн {dessert.unit}
+                      </span>
                     </div>
-                    <p className="mt-1 text-xs text-mute">Оформлення за 2–5 днів</p>
+                    <p className="mt-5 border-t border-cream/10 pt-3 text-xs uppercase tracking-[0.1em] text-mute">
+                      Оформлення за 2–5 днів
+                    </p>
                   </div>
-                  <button
-                    type="button"
+                  <Button
                     onClick={() => setOrderOpen(true)}
-                    className="focus-ring group inline-flex items-center justify-center gap-3 rounded-full bg-blood px-8 py-4 text-sm font-semibold uppercase tracking-[0.14em] text-cream transition-colors hover:bg-blood-400"
+                    size="lg"
                   >
                     Оформити замовлення
-                    <span className="inline-block text-[1.4em] leading-none transition-transform group-hover:translate-x-1">→</span>
-                  </button>
+                  </Button>
                 </div>
               </Reveal>
             </div>
@@ -160,12 +163,14 @@ export default function Dessert() {
               <h2 className="display-lg font-display text-cream">
                 Схожі <span className="italic text-blood-400">десерти</span>
               </h2>
-              <Link
+              <Button
                 to="/menu"
-                className="focus-ring hidden shrink-0 border-b border-cream/30 pb-1 text-sm uppercase tracking-[0.14em] text-cream transition-colors hover:border-blood-400 hover:text-blood-400 md:inline-block"
+                variant="outline"
+                size="sm"
+                className="hidden shrink-0 md:inline-flex"
               >
-                Усе меню <span className="inline-block text-[1.4em] leading-none align-middle">→</span>
-              </Link>
+                Усе меню
+              </Button>
             </div>
             <Reveal
               className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3"
@@ -174,7 +179,7 @@ export default function Dessert() {
             >
               {related.map((d) => (
                 <div key={d.slug} data-reveal>
-                  <DessertCard dessert={d} />
+                  <DessertCard dessert={d} showTagline={false} />
                 </div>
               ))}
             </Reveal>

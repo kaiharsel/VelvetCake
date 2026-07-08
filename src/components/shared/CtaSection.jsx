@@ -10,12 +10,12 @@ import { site } from '../../data/site'
 export default function CtaSection({
   title = (
     <>
-      Торт чекає. <br />
+      Торт чекає <br />
       <span className="italic text-blood-400">Ви готові скуштувати?</span>
     </>
   ),
   primary = { label: 'Оформити замовлення', to: '/menu' },
-  secondary = { label: 'Записатись на клас', to: '/masterclasses' },
+  secondary = null,
 }) {
   const root = useRef(null)
 
@@ -51,9 +51,11 @@ export default function CtaSection({
           <Button to={primary.to} variant="primary" size="lg">
             {primary.label}
           </Button>
-          <Button to={secondary.to} variant="outline" size="lg" arrow={false}>
-            {secondary.label}
-          </Button>
+          {secondary && (
+            <Button to={secondary.to} variant="outline" size="lg" arrow={false}>
+              {secondary.label}
+            </Button>
+          )}
         </div>
         <a
           href={site.phoneHref}

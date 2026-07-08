@@ -1,19 +1,46 @@
-import { useMemo, useState } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import Seo from '../components/ui/Seo'
 import DessertCard from '../components/ui/DessertCard'
-import Reveal from '../components/ui/Reveal'
+import Button from '../components/ui/Button'
+import ChevronRight from '../components/ui/ChevronRight'
 import CtaSection from '../components/shared/CtaSection'
 import { categories, desserts } from '../data/desserts'
+import { gsap, prefersReducedMotion } from '../lib/gsap'
 
 export default function Menu() {
+  const heroRef = useRef(null)
   const [params, setParams] = useSearchParams()
   const initialCat = params.get('cat') || 'all'
   const [cat, setCat] = useState(
     categories.some((c) => c.id === initialCat) ? initialCat : 'all',
   )
   const [query, setQuery] = useState('')
+  const [showCategoryHint, setShowCategoryHint] = useState(true)
+
+  useLayoutEffect(() => {
+    if (prefersReducedMotion) return
+    const el = heroRef.current
+    if (!el) return
+
+    const ctx = gsap.context(() => {
+      gsap
+        .timeline({ defaults: { ease: 'power4.out' } })
+        .from('[data-menu-hero-line] > span', {
+          yPercent: 115,
+          duration: 1.2,
+          stagger: 0.12,
+        })
+        .from(
+          '[data-menu-hero-fade]',
+          { opacity: 0, y: 24, duration: 1 },
+          '-=0.7',
+        )
+    }, el)
+
+    return () => ctx.revert()
+  }, [])
 
   const setCategory = (id) => {
     setCat(id)
@@ -39,48 +66,75 @@ export default function Menu() {
     <>
       <Seo
         title="Меню"
-        description="Меню VelvetCake: авторські торти, тарти, тістечка та сигнатурні десерти темного люксу. Оберіть і оформіть замовлення онлайн."
+        description="Меню VelvetCake: авторські торти, тарти, тістечка та сигнатурні десерти темного люксу. Оберіть і оформіть замовлення онлайн"
         path="/menu"
       />
 
       {/* Header */}
-      <header className="relative bg-wine-900 pb-16 pt-36 md:pb-24 md:pt-48">
+      <header ref={heroRef} className="relative bg-wine-900 pb-16 pt-36 md:pb-24 md:pt-48">
         <div className="container-shell">
-          <Reveal stagger={0.1}>
-            <h1
-              className="display-xl max-w-4xl text-balance font-display text-cream"
-              data-reveal
-            >
-              Оберіть свій <span className="italic text-blood-400">ідеальний</span> десерт
-            </h1>
-            <p className="mt-6 max-w-xl text-pretty text-mute md:text-lg" data-reveal>
-              Торти, бенто, десерти, капкейки та кенді-бари — з вашим дизайном чи
-              з нашого портфоліо. Доставка по Львову або самовивіз.
-            </p>
-          </Reveal>
+          <h1 className="display-xl max-w-4xl text-balance font-display text-cream">
+            <span data-menu-hero-line className="reveal-line">
+              <span className="block">Оберіть свій</span>
+            </span>
+            <span data-menu-hero-line className="reveal-line">
+              <span className="block">
+                <span className="italic text-blood-400">ідеальний</span> десерт
+              </span>
+            </span>
+          </h1>
+          <p
+            className="mt-6 max-w-xl text-pretty text-mute md:text-lg"
+            data-menu-hero-fade
+          >
+            Торти, бенто, десерти, капкейки та кенді-бари з вашим дизайном або
+            з нашого портфоліо. Доставка по Львову та самовивіз
+          </p>
         </div>
       </header>
 
       {/* Controls */}
-      <div className="sticky top-[68px] z-30 border-y border-cream/10 bg-ink/85 backdrop-blur-md md:top-[76px]">
+      <div className="below-mobile-header sticky z-30 border-y border-cream/10 bg-ink/85 backdrop-blur-md">
         <div className="container-shell flex flex-col gap-4 py-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-wrap gap-2" role="tablist" aria-label="Категорії">
-            {categories.map((c) => (
-              <button
-                key={c.id}
-                type="button"
-                role="tab"
-                aria-selected={cat === c.id}
-                onClick={() => setCategory(c.id)}
-                className={`focus-ring rounded-full px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.1em] transition-colors duration-300 ${
-                  cat === c.id
-                    ? 'bg-blood text-cream'
-                    : 'border border-cream/20 text-mute hover:border-cream/50 hover:text-cream'
-                }`}
-              >
-                {c.label}
-              </button>
-            ))}
+          <div className="relative min-w-0 lg:flex-1">
+            <div
+              onScroll={(event) => {
+                const rail = event.currentTarget
+                setShowCategoryHint(
+                  rail.scrollLeft + rail.clientWidth < rail.scrollWidth - 4,
+                )
+              }}
+              className="flex snap-x flex-nowrap gap-2 overflow-x-auto px-6 pb-1 pr-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex-wrap lg:overflow-visible lg:px-0 lg:pb-0 lg:pr-0"
+              role="tablist"
+              aria-label="Категорії"
+            >
+              {categories.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={cat === c.id}
+                  onClick={() => setCategory(c.id)}
+                  className={`focus-ring shrink-0 snap-start rounded-full px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.1em] transition-all duration-300 active:scale-95 ${
+                    cat === c.id
+                      ? 'bg-blood text-cream'
+                      : 'border border-cream/20 text-mute md:hover:border-cream/50 md:hover:text-cream'
+                  }`}
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
+            <div
+              aria-hidden="true"
+              className={`pointer-events-none absolute inset-y-0 right-0 z-10 flex w-16 items-center justify-end bg-gradient-to-l from-ink via-ink/95 to-transparent pr-1 transition-opacity duration-300 lg:hidden ${
+                showCategoryHint ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
+              <span className="grid h-8 w-8 place-items-center rounded-full border border-blood-400/60 bg-ink text-blood-400">
+                <ChevronRight className="h-5 w-5" />
+              </span>
+            </div>
           </div>
 
           <div className="relative w-full lg:w-72">
@@ -116,16 +170,17 @@ export default function Menu() {
           {filtered.length === 0 ? (
             <div className="grid place-items-center py-24 text-center">
               <p className="font-display text-3xl italic text-cream">Нічого не знайдено</p>
-              <button
-                type="button"
+              <Button
                 onClick={() => {
                   setQuery('')
                   setCategory('all')
                 }}
-                className="focus-ring mt-6 rounded-full border border-cream/30 px-6 py-3 text-sm uppercase tracking-[0.14em] text-cream transition-colors hover:bg-cream hover:text-ink"
+                variant="outline"
+                arrow={false}
+                className="mt-6"
               >
                 Скинути фільтри
-              </button>
+              </Button>
             </div>
           ) : (
             <motion.div
@@ -142,7 +197,7 @@ export default function Menu() {
                     exit={{ opacity: 0, scale: 0.96 }}
                     transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
                   >
-                    <DessertCard dessert={d} />
+                    <DessertCard dessert={d} showTagline={false} />
                   </motion.div>
                 ))}
               </AnimatePresence>

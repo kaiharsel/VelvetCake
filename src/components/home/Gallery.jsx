@@ -49,10 +49,10 @@ export default function Gallery() {
           className="mx-auto"
           title={
             <>
-              Кожен десерт — <span className="italic text-blood-400">окрема сцена</span>
+              Кожен десерт як <span className="italic text-blood-400">окрема сцена</span>
             </>
           }
-          lede="Світло, фактура й колір продумані до дрібниць. Так виглядає темний люкс."
+          lede="Світло, фактура й колір продумані до дрібниць. Так виглядає темний люкс"
         />
 
         <div className="mt-16 grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">
@@ -73,9 +73,9 @@ export default function Gallery() {
                     tone={it.tone}
                     ratio={it.ratio}
                     label={galleryCaptions[(ci * 2 + idx) % galleryCaptions.length]}
-                    className="transition-transform duration-[1200ms] ease-velvet group-hover:scale-105"
+                    className="transition-transform duration-[1200ms] ease-velvet md:group-hover:scale-105"
                   />
-                  <span className="absolute bottom-3 left-3 rounded-full bg-ink/70 px-3 py-1 text-[10px] uppercase tracking-[0.12em] text-cream/90 opacity-0 backdrop-blur-sm transition-opacity duration-500 group-hover:opacity-100">
+                  <span className="absolute bottom-3 left-3 rounded-full bg-ink/70 px-3 py-1 text-[10px] uppercase tracking-[0.12em] text-cream/90 opacity-100 backdrop-blur-sm transition-opacity duration-500 md:opacity-0 md:group-hover:opacity-100">
                     {galleryCaptions[(ci * 2 + idx) % galleryCaptions.length]}
                   </span>
                 </div>

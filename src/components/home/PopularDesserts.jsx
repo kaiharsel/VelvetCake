@@ -1,6 +1,8 @@
 import { useLayoutEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
 import DessertCard from '../ui/DessertCard'
+import ChevronRight from '../ui/ChevronRight'
+import Button from '../ui/Button'
+import DelayedLink from '../ui/DelayedLink'
 import { desserts } from '../../data/desserts'
 import { gsap, prefersReducedMotion } from '../../lib/gsap'
 
@@ -26,14 +28,14 @@ export default function PopularDesserts() {
 
     const mm = gsap.matchMedia()
     mm.add('(min-width: 768px)', () => {
-      const distance = trackEl.scrollWidth - window.innerWidth
+      const distance = () => Math.max(0, trackEl.scrollWidth - window.innerWidth)
       const tween = gsap.to(trackEl, {
-        x: -distance,
+        x: () => -distance(),
         ease: 'none',
         scrollTrigger: {
           trigger: el,
           start: 'top top',
-          end: () => `+=${distance}`,
+          end: () => `+=${distance()}`,
           scrub: 1,
           pin: true,
           anticipatePin: 1,
@@ -58,41 +60,43 @@ export default function PopularDesserts() {
             Улюбленці <span className="italic text-blood-400">гостей</span>
           </h2>
         </div>
-        <Link
+        <Button
           to="/menu"
-          className="focus-ring hidden shrink-0 items-center gap-2 rounded-full border border-cream/25 px-6 py-3 text-[12px] font-semibold uppercase tracking-[0.14em] text-cream transition-colors hover:border-blood-400 hover:bg-blood-400 hover:text-ink md:inline-flex"
+          variant="outline"
+          size="sm"
+          className="hidden shrink-0 md:inline-flex"
         >
-          Усе меню <span className="inline-block text-[1.4em] leading-none align-middle">→</span>
-        </Link>
+          Усе меню
+        </Button>
       </div>
 
-      {/* Desktop: horizontal pinned track. Mobile: native horizontal scroll. */}
+      {/* Mobile: native swipe carousel. Desktop: horizontal pinned track. */}
       <div className="md:flex md:min-h-0 md:flex-1 md:items-center">
         <div
           ref={track}
-          className="flex gap-5 overflow-x-auto pb-4 pt-10 [scrollbar-width:none] md:gap-8 md:overflow-visible md:py-0 md:pl-[max(1.5rem,calc((100vw-1600px)/2+4rem))] md:pr-[12vw]"
+          className="flex snap-x snap-mandatory scroll-px-12 gap-5 overflow-x-auto pb-4 pl-12 pr-8 pt-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:snap-none md:gap-8 md:overflow-visible md:px-0 md:py-0 md:pl-[max(1.5rem,calc((100vw-1600px)/2+4rem))] md:pr-[12vw]"
         >
           {rail.map((d) => (
             <div
               key={d.slug}
-              className="w-[74vw] shrink-0 sm:w-[52vw] md:w-[27vw] lg:w-[21vw]"
+              className="w-[74vw] shrink-0 snap-center first:snap-start sm:w-[52vw] md:w-[27vw] md:snap-align-none lg:w-[21vw]"
             >
-              <DessertCard dessert={d} ratio="3 / 4" />
+              <DessertCard dessert={d} ratio="3 / 4" showTagline={false} />
             </div>
           ))}
           {/* Tail CTA card */}
-          <div className="flex w-[74vw] shrink-0 items-center sm:w-[52vw] md:w-[21vw]">
-            <Link
+          <div className="flex w-[74vw] shrink-0 snap-center items-stretch sm:w-[52vw] md:w-[21vw] md:snap-align-none">
+            <DelayedLink
               to="/menu"
-              className="focus-ring group flex aspect-[3/4] w-full flex-col items-center justify-center gap-4 rounded-[3px] border border-cream/15 text-center transition-colors hover:border-blood-400"
+              className="focus-ring group flex w-full flex-1 flex-col items-center justify-center gap-4 rounded-[3px] border border-cream/15 text-center transition-all duration-500 active:scale-[0.99] data-[pending=true]:scale-[0.97] data-[pending=true]:border-blood-400 md:hover:border-blood-400"
             >
               <span className="font-display text-3xl italic text-cream">
-                Дивитись усе
+                Дивитись все
               </span>
-              <span className="text-sm uppercase tracking-[0.14em] text-blood-400 transition-transform group-hover:translate-x-1">
-                30+ десертів <span className="inline-block text-[1.4em] leading-none align-middle">→</span>
+              <span className="flex items-center gap-2 text-sm uppercase tracking-[0.14em] text-blood-400 transition-transform group-data-[pending=true]:translate-x-1 md:group-hover:translate-x-1">
+                30+ десертів <ChevronRight />
               </span>
-            </Link>
+            </DelayedLink>
           </div>
         </div>
       </div>

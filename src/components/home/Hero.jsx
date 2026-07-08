@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
 import Figure from '../ui/Figure'
+import Button from '../ui/Button'
 import { gsap, prefersReducedMotion } from '../../lib/gsap'
 
 export default function Hero() {
@@ -77,7 +77,7 @@ export default function Hero() {
             tone="wine"
             ratio="auto"
             priority
-            label="Hero · головне фото"
+            label="Головне фото"
             className="h-full w-full"
             // src="/desserts/hero.jpg"  ← додайте фото сюди
           />
@@ -102,25 +102,18 @@ export default function Hero() {
             data-hero-fade
             className="max-w-md text-pretty text-base leading-relaxed text-cream/80 md:text-lg"
           >
-            Замовити торт у подарунок чи просто почастувати себе смачненьким —
-            усі ваші солодкі бажання ми втілимо в реальність і подаруємо приємні
-            емоції та спогади.
+            Замовте торт у подарунок або просто почастуйте себе смачненьким.
+            Ми втілимо ваші солодкі бажання в реальність і подаруємо приємні
+            емоції та спогади
           </p>
 
           <div data-hero-fade className="flex flex-wrap items-center gap-4">
-            <Link
-              to="/menu"
-              className="focus-ring group inline-flex items-center gap-3 rounded-full bg-blood px-8 py-4 font-sans text-[13px] font-semibold uppercase tracking-[0.14em] text-cream transition-colors duration-500 hover:bg-blood-400"
-            >
+            <Button to="/menu" size="lg">
               Обрати десерт
-              <span className="inline-block text-[1.4em] leading-none transition-transform duration-500 group-hover:translate-x-1">→</span>
-            </Link>
-            <Link
-              to="/masterclasses"
-              className="focus-ring inline-flex items-center gap-3 rounded-full border border-cream/30 px-8 py-4 font-sans text-[13px] font-semibold uppercase tracking-[0.14em] text-cream transition-colors duration-500 hover:border-cream hover:bg-cream hover:text-ink"
-            >
+            </Button>
+            <Button to="/masterclasses" variant="outline" size="lg" arrow={false}>
               Майстер-класи
-            </Link>
+            </Button>
           </div>
         </div>
       </div>
