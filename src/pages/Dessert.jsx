@@ -18,7 +18,7 @@ export default function Dessert() {
   const [activeImg, setActiveImg] = useState(0)
   const [orderOpen, setOrderOpen] = useState(false)
 
-  const fallbackImage = dessert?.image || (dessert ? `/desserts/${dessert.slug}.png` : '')
+  const fallbackImage = dessert?.image || (dessert ? `/desserts/${dessert.slug}.webp` : '')
   const gallery = [
     fallbackImage,
     ...(dessert && Array.isArray(dessert.gallery) ? dessert.gallery : []),

@@ -161,7 +161,7 @@ export default function Advantages() {
               <article key={a.no} className="w-[82vw] shrink-0 snap-center">
                 <div className="overflow-hidden rounded-[3px]">
                   <Figure
-                    src={`/desserts/advantage-${a.no}.png`}
+                    src={`/desserts/advantage-${a.no}.webp`}
                     alt={a.title}
                     tone={tones[i % tones.length]}
                     ratio="5 / 4"
@@ -222,7 +222,7 @@ export default function Advantages() {
                 <div key={a.no} data-adv-item className="md:min-h-[70vh]">
                   <div data-adv-media className="overflow-hidden rounded-[3px]">
                     <Figure
-                      src={`/desserts/advantage-${a.no}.png`}
+                      src={`/desserts/advantage-${a.no}.webp`}
                       alt={a.title}
                       tone={tones[i % tones.length]}
                       ratio="5 / 4"

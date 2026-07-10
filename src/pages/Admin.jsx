@@ -312,7 +312,7 @@ export default function Admin() {
               type="button"
               onClick={() => changeSection(item.id)}
               className={`rounded-full border px-5 py-2.5 text-[12px] font-semibold uppercase tracking-[0.12em] transition-colors ${
-                item.id === 'admin' ? 'ml-auto' : ''
+                item.id === 'admin' ? 'sm:ml-auto' : ''
               } ${
                 section === item.id
                   ? 'border-blood bg-blood text-cream'

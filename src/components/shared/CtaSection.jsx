@@ -40,7 +40,7 @@ export default function CtaSection({
       <div className="absolute inset-0">
         <div data-cta-img className="h-full w-full">
           <Figure
-            src="/desserts/cta-home.png"
+            src="/desserts/cta-home.webp"
             alt="Десерт VelvetCake"
             tone="wine"
             ratio="auto"

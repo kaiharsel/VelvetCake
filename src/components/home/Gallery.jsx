@@ -73,7 +73,7 @@ export default function Gallery() {
               className="group relative w-[78vw] shrink-0 snap-center overflow-hidden rounded-[3px] first:snap-start sm:w-[56vw]"
             >
               <Figure
-                src={`/desserts/gallery-${index + 1}.png`}
+                src={`/desserts/gallery-${index + 1}.webp`}
                 alt={galleryCaptions[index % galleryCaptions.length]}
                 tone={it.tone}
                 ratio={it.ratio}
@@ -101,7 +101,7 @@ export default function Gallery() {
                   className="group relative overflow-hidden rounded-[3px]"
                 >
                   <Figure
-                    src={`/desserts/gallery-${ci * 2 + idx + 1}.png`}
+                    src={`/desserts/gallery-${ci * 2 + idx + 1}.webp`}
                     alt={galleryCaptions[(ci * 2 + idx) % galleryCaptions.length]}
                     tone={it.tone}
                     ratio={it.ratio}

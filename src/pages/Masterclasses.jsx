@@ -50,7 +50,15 @@ export default function Masterclasses() {
           .from('[data-mh-fade]', { opacity: 0, y: 24, duration: 1, stagger: 0.1 }, '-=0.6')
           .from(image, { scale: 1.15, duration: 1.6, ease: 'power3.out' }, 0)
 
-        if (window.matchMedia('(min-width: 768px)').matches) {
+        // Desktop-only. In-app browsers (Telegram, Instagram, …) lie about
+        // `hover`/`pointer` media queries, so detect a real touchscreen via
+        // navigator.maxTouchPoints, which WebViews report honestly. Any touch
+        // device is excluded, where scrubbed scroll movement feels jittery.
+        const isTouch =
+          navigator.maxTouchPoints > 0 || 'ontouchstart' in window
+        const isDesktop =
+          !isTouch && window.matchMedia('(min-width: 768px)').matches
+        if (isDesktop) {
           gsap.to(image, {
             yPercent: 18,
             ease: 'none',
@@ -80,6 +88,36 @@ export default function Masterclasses() {
     return () => {
       removePointerMove()
       ctx.revert()
+    }
+  }, [])
+
+  // Freeze the hero height on touch devices. iOS in-app browsers (Telegram)
+  // grow/shrink their toolbar while scrolling, which changes viewport units
+  // (vh/svh/lvh) and makes the bottom-anchored content and the cover image
+  // jump. We pin the section to the load-time height and only re-measure on a
+  // width (orientation) change, ignoring the toolbar-driven height changes.
+  useLayoutEffect(() => {
+    const section = heroRef.current
+    if (!section) return
+    const isTouch =
+      navigator.maxTouchPoints > 0 || 'ontouchstart' in window
+    if (!isTouch) return
+    let lastWidth = window.innerWidth
+    const pin = () => {
+      section.style.minHeight = `${window.innerHeight}px`
+    }
+    pin()
+    const onResize = () => {
+      if (window.innerWidth !== lastWidth) {
+        lastWidth = window.innerWidth
+        pin()
+      }
+    }
+    window.addEventListener('resize', onResize)
+    window.addEventListener('orientationchange', pin)
+    return () => {
+      window.removeEventListener('resize', onResize)
+      window.removeEventListener('orientationchange', pin)
     }
   }, [])
 
@@ -128,9 +166,9 @@ export default function Masterclasses() {
         className="relative flex min-h-[100svh] items-end overflow-hidden bg-wine-900 pb-16 pt-36 md:min-h-[92svh]"
       >
         <div className="absolute inset-0">
-          <div data-mh-img className="absolute inset-[-8%]">
+          <div data-mh-img className="absolute inset-0 md:inset-[-8%]">
             <Figure
-              src="/desserts/masterclasses-hero.png"
+              src="/desserts/masterclasses-hero.webp"
               alt="Майстер-клас VelvetCake"
               tone="wine"
               ratio="auto"
@@ -301,7 +339,7 @@ export default function Masterclasses() {
                 className="relative w-[78vw] shrink-0 snap-center overflow-hidden rounded-[3px] first:snap-start sm:w-[56vw]"
               >
                 <Figure
-                  src={`/desserts/masterclasses-gallery-${i + 1}.png`}
+                  src={`/desserts/masterclasses-gallery-${i + 1}.webp`}
                   alt={cap}
                   tone={i % 2 ? 'blood' : 'wine'}
                   ratio="4 / 5"
@@ -315,7 +353,7 @@ export default function Masterclasses() {
             {masterclassGallery.map((cap, i) => (
               <div key={cap} className={`overflow-hidden rounded-[3px] ${i % 2 ? 'md:mt-10' : ''}`}>
                 <Figure
-                  src={`/desserts/masterclasses-gallery-${i + 1}.png`}
+                  src={`/desserts/masterclasses-gallery-${i + 1}.webp`}
                   alt={cap}
                   tone={i % 2 ? 'blood' : 'wine'}
                   ratio="4 / 5"
@@ -377,7 +415,19 @@ export default function Masterclasses() {
                   </div>
                   <div>
                     <label htmlFor="bk-seats" className="mb-2 block text-[11px] uppercase tracking-[0.14em] text-mute">Місць</label>
-                    <input id="bk-seats" name="seats" type="number" min="1" max="10" defaultValue="1"
+                    <input id="bk-seats" name="seats" type="number" min="6" max="12" step="1" defaultValue="6" inputMode="numeric"
+                      onInput={(e) => {
+                        // Strip non-digits and never let the value exceed 12.
+                        let v = e.target.value.replace(/\D/g, '')
+                        if (v !== '' && Number(v) > 12) v = '12'
+                        e.target.value = v
+                      }}
+                      onBlur={(e) => {
+                        // Snap anything below the minimum (or empty) up to 6.
+                        const n = Number(e.target.value)
+                        if (e.target.value === '' || n < 6) e.target.value = '6'
+                        else if (n > 12) e.target.value = '12'
+                      }}
                       className="w-full rounded-md border border-wine-700/70 bg-ink px-4 py-3 text-cream transition-colors focus:border-blood-400/70 focus:outline-none focus:ring-1 focus:ring-blood-400/30" />
                   </div>
                 </div>

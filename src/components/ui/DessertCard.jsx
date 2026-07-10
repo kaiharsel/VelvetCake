@@ -18,7 +18,7 @@ export default function DessertCard({
   showTagline = true,
 }) {
   const { slug, name, category, short, price, unit, tone, tagline } = dessert
-  const image = dessert.image || `/desserts/${slug}.png`
+  const image = dessert.image || `/desserts/${slug}.webp`
 
   return (
     <DelayedLink

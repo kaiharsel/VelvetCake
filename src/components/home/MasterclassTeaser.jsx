@@ -30,7 +30,7 @@ export default function MasterclassTeaser() {
           <div ref={media} className="relative order-2 overflow-hidden rounded-[3px] md:order-1">
             <div data-mc-img className="scale-110">
               <Figure
-                src="/desserts/masterclass-home.png"
+                src="/desserts/masterclass-home.webp"
                 alt="Майстер-клас VelvetCake"
                 tone="wine"
                 ratio="4 / 5"

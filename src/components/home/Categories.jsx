@@ -40,7 +40,7 @@ export default function Categories() {
               className="focus-ring group relative block overflow-hidden rounded-[3px] border border-cream/15 transition-all duration-500 active:scale-[0.99] data-[pending=true]:scale-[0.97] data-[pending=true]:border-blood-400 md:hover:border-blood-400"
             >
               <Figure
-                src={`/desserts/category-${cat.id}.png`}
+                src={`/desserts/category-${cat.id}.webp`}
                 alt={cat.title}
                 tone={tones[i % tones.length]}
                 ratio="3 / 4"

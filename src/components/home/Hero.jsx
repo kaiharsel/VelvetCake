@@ -32,9 +32,15 @@ export default function Hero() {
           )
 
         // Parallax drift on the hero image as the page scrolls away.
-        // Touch scroll on phones makes scrubbed image movement feel jittery,
-        // so this is desktop-only.
-        if (window.matchMedia('(min-width: 768px)').matches) {
+        // Touch scroll makes scrubbed image movement feel jittery, so this is
+        // desktop-only. In-app browsers (Telegram, Instagram, …) lie about
+        // `hover`/`pointer` media queries, so we detect a real touchscreen via
+        // navigator.maxTouchPoints, which WebViews report honestly.
+        const isTouch =
+          navigator.maxTouchPoints > 0 || 'ontouchstart' in window
+        const isDesktop =
+          !isTouch && window.matchMedia('(min-width: 768px)').matches
+        if (isDesktop) {
           gsap.to(imageWrap.current, {
             yPercent: 18,
             ease: 'none',
@@ -69,6 +75,36 @@ export default function Hero() {
     return () => ctx.revert()
   }, [])
 
+  // Freeze the hero height on touch devices. iOS in-app browsers (Telegram)
+  // grow/shrink their toolbar while scrolling, which changes viewport units
+  // (vh/svh/lvh) and makes the bottom-anchored content and the cover image
+  // jump. We pin the section to the load-time height and only re-measure on a
+  // width (orientation) change, ignoring the toolbar-driven height changes.
+  useLayoutEffect(() => {
+    const section = root.current
+    if (!section) return
+    const isTouch =
+      navigator.maxTouchPoints > 0 || 'ontouchstart' in window
+    if (!isTouch) return
+    let lastWidth = window.innerWidth
+    const pin = () => {
+      section.style.minHeight = `${window.innerHeight}px`
+    }
+    pin()
+    const onResize = () => {
+      if (window.innerWidth !== lastWidth) {
+        lastWidth = window.innerWidth
+        pin()
+      }
+    }
+    window.addEventListener('resize', onResize)
+    window.addEventListener('orientationchange', pin)
+    return () => {
+      window.removeEventListener('resize', onResize)
+      window.removeEventListener('orientationchange', pin)
+    }
+  }, [])
+
   return (
     <section
       ref={root}
@@ -76,9 +112,9 @@ export default function Hero() {
     >
       {/* Background image + placeholder */}
       <div className="absolute inset-0 -z-0">
-        <div ref={imageWrap} className="absolute inset-[-8%]">
+        <div ref={imageWrap} className="absolute inset-0 md:inset-[-8%]">
           <Figure
-            src="/desserts/hero-main.png"
+            src="/desserts/hero-main.webp"
             alt="Кондитерка VelvetCake оформлює торт"
             tone="wine"
             ratio="auto"

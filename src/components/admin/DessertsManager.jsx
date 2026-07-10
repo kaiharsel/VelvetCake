@@ -155,7 +155,7 @@ export default function DessertsManager() {
   }, [desserts, query])
 
   const codePreviewImage =
-    draft.slug && codeDessertSlugs.has(draft.slug) ? `/desserts/${draft.slug}.png` : ''
+    draft.slug && codeDessertSlugs.has(draft.slug) ? `/desserts/${draft.slug}.webp` : ''
   const previewImage = imagePreview || draft.image || codePreviewImage
   const galleryUrls = Array.isArray(draft.gallery) ? draft.gallery : []
   const hasProducts = desserts.length > 0
@@ -773,7 +773,7 @@ export default function DessertsManager() {
                 <input
                   value={draft.image}
                   onChange={(event) => updateDraft('image', event.target.value)}
-                  placeholder="/desserts/bento-tort.png"
+                  placeholder="/desserts/bento-tort.webp"
                   className="cms-input mt-2"
                 />
               </label>
@@ -1003,7 +1003,7 @@ function GallerySlot({
           <input
             value={url}
             onChange={(event) => onUrlChange(event.target.value)}
-            placeholder="/desserts/bento-detail.png"
+            placeholder="/desserts/bento-detail.webp"
             className="cms-input mt-2 h-9 px-3 text-xs"
           />
 
