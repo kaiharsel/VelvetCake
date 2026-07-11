@@ -11,6 +11,10 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (!id.includes('node_modules')) return
+          // Firebase SDK is only used by lazily-loaded code (CMS, leads, CRM),
+          // so isolate it: it must not ride in a chunk the home page eagerly
+          // downloads.
+          if (/[\\/]@?firebase[\\/]/.test(id)) return 'firebase-sdk'
           if (/[\\/]gsap[\\/]/.test(id)) return 'gsap'
           if (/[\\/]framer-motion[\\/]/.test(id)) return 'motion'
           if (/[\\/]lenis[\\/]/.test(id)) return 'lenis'

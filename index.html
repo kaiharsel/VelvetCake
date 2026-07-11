@@ -23,19 +23,27 @@
     <meta property="og:title" content="VelvetCake | Кондитерська у Львові" />
     <meta
       property="og:description"
-      content="Торти, капкейки, бенто, кенді бар та майстер-класи ручної роботи у Львові"
+      content="Торти, капкейки, бенто, десерти, кенді бар та майстер-класи ручної роботи у Львові"
     />
     <meta property="og:image" content="/og.jpg" />
     <meta property="og:locale" content="uk_UA" />
     <meta name="twitter:card" content="summary_large_image" />
 
-    <!-- Fonts -->
+    <!-- Fonts — loaded non-render-blocking; display=swap shows fallback text immediately -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap"
+      />
+    </noscript>
   </head>
   <body>
     <div id="root"></div>

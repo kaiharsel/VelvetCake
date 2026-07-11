@@ -13,11 +13,11 @@ import FormSelect from '../components/ui/FormSelect'
 import FaqSection from '../components/shared/FaqSection'
 import { useSnapIndicator } from '../hooks/useSnapIndicator'
 import {
-  masterclasses,
   masterclassAudience,
   masterclassProgram,
   masterclassFaq,
 } from '../data/content'
+import { useMasterclasses } from '../hooks/useMasterclasses'
 import { site } from '../data/site'
 import { gsap, prefersReducedMotion } from '../lib/gsap'
 import { createLead } from '../lib/leads'
@@ -27,7 +27,8 @@ const masterclassGallery = ['Оформлення', 'Крем', 'Декор', '�
 
 export default function Masterclasses() {
   const heroRef = useRef(null)
-  const [selected, setSelected] = useState(masterclasses[0].slug)
+  const { masterclasses } = useMasterclasses()
+  const [selected, setSelected] = useState(masterclasses[0]?.slug || '')
   const [sent, setSent] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -44,11 +45,22 @@ export default function Masterclasses() {
 
     const ctx = gsap.context(() => {
       if (!prefersReducedMotion) {
-        gsap
-          .timeline({ defaults: { ease: 'power4.out' } })
-          .from('[data-mh-line] > span', { yPercent: 115, duration: 1.1, stagger: 0.12 })
+        const tl = gsap.timeline({ defaults: { ease: 'power4.out' }, paused: true })
+        tl.from('[data-mh-line] > span', { yPercent: 115, duration: 1.1, stagger: 0.12 })
           .from('[data-mh-fade]', { opacity: 0, y: 24, duration: 1, stagger: 0.1 }, '-=0.6')
           .from(image, { scale: 1.15, duration: 1.6, ease: 'power3.out' }, 0)
+
+        // Start once fonts are ready so the display font doesn't swap mid-intro
+        // and reflow the animating text. Capped so a slow font can't stall it.
+        let started = false
+        const startIntro = () => {
+          if (started) return
+          started = true
+          tl.play()
+        }
+        if (document.fonts?.ready) document.fonts.ready.then(startIntro)
+        else startIntro()
+        gsap.delayedCall(0.4, startIntro)
 
         // Desktop-only. In-app browsers (Telegram, Instagram, …) lie about
         // `hover`/`pointer` media queries, so detect a real touchscreen via
@@ -195,7 +207,7 @@ export default function Masterclasses() {
             вибраній темі
           </p>
           <div data-mh-fade className="mt-10 flex flex-wrap gap-3">
-            {['Навіть без досвіду', 'Усе включено', '6–12 у групі', '1,5–2 год за 1500 грн'].map((t) => (
+            {['Навіть без досвіду', 'Усе включено'].map((t) => (
               <span
                 key={t}
                 className="rounded-full border border-cream/25 px-4 py-2 text-xs uppercase tracking-[0.12em] text-cream/80"
@@ -227,6 +239,16 @@ export default function Masterclasses() {
             title={<>Оберіть свою <span className="italic text-blood-400">тему</span></>}
             lede="П'ять напрямків оформлення. Іменинник або іменинниця обирає смак, начинку та тему. Решта групи разом збирає тортики в тому ж стилі"
           />
+          {masterclasses.length === 0 ? (
+            <div className="mt-14 grid place-items-center px-6 py-24 text-center md:py-28">
+              <p className="font-display text-3xl italic text-cream md:text-4xl">
+                Теми скоро зʼявляться
+              </p>
+              <p className="mt-3 max-w-md text-sm leading-relaxed text-mute">
+                Ми готуємо нові майстер-класи — завітайте трохи згодом
+              </p>
+            </div>
+          ) : (
           <Reveal className="mt-14 flex flex-col" stagger={0.08} start="top 118%" y={40}>
             {masterclasses.map((mc, i) => (
               <DelayedButton
@@ -248,8 +270,9 @@ export default function Masterclasses() {
                   </h3>
                   <p className="mt-2 max-w-md text-sm text-mute">{mc.text}</p>
                 </div>
-                <div className="text-sm text-cream/80 md:col-span-2">
-                  {mc.duration}, {mc.seats} місць
+                <div className="flex flex-col gap-1 text-sm text-cream/80 md:col-span-2">
+                  <span>{mc.duration}</span>
+                  <span>{mc.seats} місць</span>
                 </div>
                 <div className="flex items-center justify-between gap-4 md:col-span-2 md:justify-end">
                   <span className="price-display text-3xl font-semibold leading-none tracking-tight text-cream md:text-4xl">
@@ -260,6 +283,7 @@ export default function Masterclasses() {
               </DelayedButton>
             ))}
           </Reveal>
+          )}
         </div>
       </section>
 

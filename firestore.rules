@@ -2,25 +2,81 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /leads/{leadId} {
-      // Public site forms can create new leads.
-      // For a portfolio/demo this is enough. For production add rate limiting
-      // through App Check, Cloud Functions or stricter validation.
-      allow create: if true;
 
-      // CRM access is only for signed-in Firebase Auth users.
-      allow read, update, delete: if request.auth != null;
+    // ─────────────────────────────────────────────────────────────────────
+    // Admin allowlist.
+    // `request.auth != null` is NOT enough: the web API key is public and the
+    // Email/Password provider is enabled, so anyone could self-register and
+    // would then pass a "signed-in" check. CRM/CMS access is therefore limited
+    // to explicit admin UIDs.
+    //
+    // Get a UID from: Firebase Console → Authentication → Users → ⋮ → Copy UID.
+    // IMPORTANT: replace the placeholder before `firebase deploy`, otherwise
+    // this fails closed and the admin also loses access.
+    //
+    // Recommended hardening (Firebase/GCP console, not in this file):
+    //   • Authentication → Settings → disable "Enable create (sign-up)".
+    //   • Restrict the web API key to the Vercel domain (HTTP referrers).
+    //   • Enable App Check to stop scripted abuse of the public `create` below.
+    //   • Confirm these rules are actually deployed (repo file ≠ live rules).
+    // ─────────────────────────────────────────────────────────────────────
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.uid in ['sIiWqRaVAIfBsJ2ah41h5DEtbqo1'];
+    }
+
+    // Anonymous site forms may create a lead, but only a well-formed one:
+    // fixed set of keys, sane types/sizes, fresh 'new' status. Blocks arbitrary
+    // or bloated documents. (Volume abuse is best stopped with App Check.)
+    function isValidLead() {
+      let d = request.resource.data;
+      return d.keys().hasOnly([
+          'type', 'status', 'name', 'phone', 'preferredDate', 'note',
+          'product', 'productSlug', 'classSlug', 'classTitle', 'seats',
+          'source', 'pageUrl', 'userAgent', 'createdAt', 'updatedAt'
+        ])
+        && d.status == 'new'
+        && d.type in ['order', 'masterclass']
+        && d.name is string && d.name.size() <= 120
+        && d.phone is string && d.phone.size() <= 40
+        && d.note is string && d.note.size() <= 1000
+        && d.preferredDate is string && d.preferredDate.size() <= 40
+        && d.product is string && d.product.size() <= 160
+        && d.productSlug is string && d.productSlug.size() <= 160
+        && d.classSlug is string && d.classSlug.size() <= 160
+        && d.classTitle is string && d.classTitle.size() <= 160
+        && d.source is string && d.source.size() <= 80
+        && d.pageUrl is string && d.pageUrl.size() <= 2000
+        && d.userAgent is string && d.userAgent.size() <= 1000
+        && (d.seats == null || d.seats is number)
+        && d.createdAt == request.time;
+    }
+
+    match /leads/{leadId} {
+      // Public site forms can create new (validated) leads.
+      allow create: if isValidLead();
+
+      // CRM access is only for allowlisted admins.
+      allow read, update, delete: if isAdmin();
     }
 
     match /desserts/{slug} {
       // Public site reads product content from the CMS.
       allow read: if true;
 
-      // CRM/CMS edits are only for signed-in admins.
-      allow create, update, delete: if request.auth != null;
+      // CRM/CMS edits are only for allowlisted admins.
+      allow create, update, delete: if isAdmin();
     }
 
-    // Future CMS collections should stay private by default until wired.
+    match /masterclasses/{slug} {
+      // Public site reads masterclass content from the CMS.
+      allow read: if true;
+
+      // CRM/CMS edits are only for allowlisted admins.
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Future CMS collections stay private by default until wired.
     match /{document=**} {
       allow read, write: if false;
     }

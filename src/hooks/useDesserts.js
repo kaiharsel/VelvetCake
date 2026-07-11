@@ -3,25 +3,42 @@ import {
   getDessert as getCodeDessert,
   getRelated as getCodeRelated,
 } from '../data/desserts'
-import { mergeDessertsWithCode, subscribeDesserts } from '../lib/cms'
+import { mergeDessertsWithCode } from '../lib/dessertsMerge'
 
 export function useDesserts() {
   const [items, setItems] = useState(() => mergeDessertsWithCode([]))
   const [source, setSource] = useState('code')
 
   useEffect(() => {
-    return subscribeDesserts(
-      (nextItems) => {
-        setItems(mergeDessertsWithCode(nextItems))
-        setSource(nextItems.length ? 'firebase' : 'code')
-      },
-      (err) => {
-        console.warn('Desserts CMS fallback:', err)
-        setItems(mergeDessertsWithCode([]))
-        setSource('code')
-      },
-      { includeHidden: true },
-    )
+    // Load the Firestore-backed CMS lazily, after paint, so firebase stays off
+    // the critical path. The page already renders the code catalog above.
+    let unsubscribe = null
+    let cancelled = false
+
+    import('../lib/cms')
+      .then(({ subscribeDesserts }) => {
+        if (cancelled) return
+        unsubscribe = subscribeDesserts(
+          (nextItems) => {
+            setItems(mergeDessertsWithCode(nextItems))
+            setSource(nextItems.length ? 'firebase' : 'code')
+          },
+          (err) => {
+            console.warn('Desserts CMS fallback:', err)
+            setItems(mergeDessertsWithCode([]))
+            setSource('code')
+          },
+          { includeHidden: true },
+        )
+      })
+      .catch((err) => {
+        console.warn('Desserts CMS load failed:', err)
+      })
+
+    return () => {
+      cancelled = true
+      if (unsubscribe) unsubscribe()
+    }
   }, [])
 
   return { desserts: items, source }

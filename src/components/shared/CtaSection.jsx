@@ -35,13 +35,42 @@ export default function CtaSection({
     return () => ctx.revert()
   }, [])
 
+  // Freeze the section height on touch devices so it doesn't twitch when an iOS
+  // in-app browser (Telegram) grows/shrinks its toolbar on scroll. We pin the
+  // rendered height once and only re-measure on a width (orientation) change,
+  // ignoring the toolbar-driven height changes. Same approach as the hero.
+  useLayoutEffect(() => {
+    const section = root.current
+    if (!section) return
+    const isTouch =
+      navigator.maxTouchPoints > 0 || 'ontouchstart' in window
+    if (!isTouch) return
+    let lastWidth = window.innerWidth
+    const pin = () => {
+      section.style.minHeight = ''
+      section.style.minHeight = `${section.offsetHeight}px`
+    }
+    pin()
+    const onResize = () => {
+      if (window.innerWidth !== lastWidth) {
+        lastWidth = window.innerWidth
+        pin()
+      }
+    }
+    window.addEventListener('resize', onResize)
+    window.addEventListener('orientationchange', pin)
+    return () => {
+      window.removeEventListener('resize', onResize)
+      window.removeEventListener('orientationchange', pin)
+    }
+  }, [])
+
   return (
     <section ref={root} className="relative flex min-h-[80svh] items-center overflow-hidden">
       <div className="absolute inset-0">
         <div data-cta-img className="h-full w-full">
+          {/* No photo on purpose — the wine placeholder is the intended look. */}
           <Figure
-            src="/desserts/cta-home.webp"
-            alt="Десерт VelvetCake"
             tone="wine"
             ratio="auto"
             className="h-full w-full"

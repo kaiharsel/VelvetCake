@@ -18,7 +18,7 @@ export default function Footer() {
               </div>
             </div>
             <p className="mt-6 max-w-sm text-pretty leading-relaxed text-mute">
-              Авторська кондитерська темного люксу. Драматичні торти й десерти
+              Авторська кондитерська зі Львова. Створюємо торти й десерти
               ручної роботи з {site.founded} року
             </p>
             <a

@@ -26,5 +26,18 @@ dist-ssr
 .env
 .env.production
 .env.local
+# Any other env file with secrets (keep an optional committed .env.example)
+.env.*
+!.env.example
 .vercel/
 Thumbs.db
+desktop.ini
+
+# Firebase (CLI cache & local emulator artifacts).
+# NOTE: firebase.json and .firebaserc are config and SHOULD stay tracked.
+.firebase/
+.runtimeconfig.json
+firebase-export-*/
+
+# Claude Code local tooling (agents, skills, configs) — not part of the app.
+.claude/

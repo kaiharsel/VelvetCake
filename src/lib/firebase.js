@@ -1,5 +1,4 @@
 import { initializeApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
 
@@ -14,7 +13,12 @@ const firebaseConfig = {
 }
 
 export const firebaseApp = initializeApp(firebaseConfig)
-export const auth = getAuth(firebaseApp)
 export const db = getFirestore(firebaseApp)
 export const storage = getStorage(firebaseApp)
+
+// Auth is intentionally NOT initialized here. Calling getAuth() eagerly loads
+// the auth/iframe.js handshake from the Firebase auth domain (~2s on the
+// critical path), which hurt LCP on every public page. Auth is only needed in
+// the CRM, so it is created there (Admin is a separate code-split chunk) from
+// the exported firebaseApp.
 

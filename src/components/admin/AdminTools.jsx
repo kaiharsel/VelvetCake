@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { resyncDessertsFromCode } from '../../lib/cms'
+import { resyncMasterclassesFromCode } from '../../lib/masterclassesCms'
 import { resyncDemoLeads } from '../../lib/leads'
 import ConfirmDialog from './ConfirmDialog'
 
@@ -23,6 +24,7 @@ export default function AdminTools() {
   const [syncingAll, setSyncingAll] = useState(false)
   const [syncingLeads, setSyncingLeads] = useState(false)
   const [syncingDesserts, setSyncingDesserts] = useState(false)
+  const [syncingMc, setSyncingMc] = useState(false)
   const [error, setError] = useState('')
   const [pendingAction, setPendingAction] = useState(null)
 
@@ -60,6 +62,7 @@ export default function AdminTools() {
 
   const resetEverything = async () => {
     await resyncDessertsFromCode()
+    await resyncMasterclassesFromCode()
     await resyncDemoLeads()
   }
 
@@ -89,7 +92,7 @@ export default function AdminTools() {
             title="Весь демо-стан"
             text="Повертає до початкового вигляду і товари, і заявки. Найшвидший варіант перед новою презентацією"
             buttonLabel={syncingAll ? 'Відкатуємо…' : 'Відкотити все'}
-            disabled={syncingAll || syncingDesserts || syncingLeads}
+            disabled={syncingAll || syncingDesserts || syncingLeads || syncingMc}
             featured
             onClick={() =>
               runAction({
@@ -116,6 +119,23 @@ export default function AdminTools() {
                 action: resyncDessertsFromCode,
                 setLoading: setSyncingDesserts,
                 redirectSection: 'desserts',
+              })
+            }
+          />
+          <ToolCard
+            title="Майстер-класи"
+            text="Повертає теми оформлення майстер-класів до початкового списку з коду. Назви, ціни, тривалість, порядок і видимість стануть базовими"
+            buttonLabel={syncingMc ? 'Відкатуємо…' : 'Скинути майстер-класи'}
+            disabled={syncingMc}
+            onClick={() =>
+              runAction({
+                title: 'Скинути майстер-класи?',
+                message:
+                  'Усі зміни в майстер-класах будуть замінені початковим списком із коду. Продовжити?',
+                confirmLabel: 'Відкотити',
+                action: resyncMasterclassesFromCode,
+                setLoading: setSyncingMc,
+                redirectSection: 'masterclasses',
               })
             }
           />
@@ -167,7 +187,7 @@ export default function AdminTools() {
         title={pendingAction?.title}
         description={pendingAction?.message}
         confirmLabel={pendingAction?.confirmLabel}
-        loading={syncingAll || syncingLeads || syncingDesserts}
+        loading={syncingAll || syncingLeads || syncingDesserts || syncingMc}
         onCancel={() => setPendingAction(null)}
         onConfirm={confirmAction}
       />

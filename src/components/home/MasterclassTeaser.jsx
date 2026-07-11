@@ -37,8 +37,15 @@ export default function MasterclassTeaser() {
                 label="Майстер-клас"
               />
             </div>
-            <div className="absolute bottom-5 left-5 rounded-full border border-cream/15 bg-ink/85 px-5 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-cream/85 shadow-[0_10px_28px_rgba(0,0,0,0.28)] backdrop-blur-md">
-              6–12 у групі
+            <div className="absolute bottom-5 left-5 flex flex-wrap gap-2">
+              {['Навіть без досвіду', 'Усе включено'].map((t) => (
+                <span
+                  key={t}
+                  className="rounded-full border border-cream/15 bg-ink/85 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-cream/85 shadow-[0_10px_28px_rgba(0,0,0,0.28)] backdrop-blur-md"
+                >
+                  {t}
+                </span>
+              ))}
             </div>
           </div>
 

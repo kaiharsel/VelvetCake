@@ -14,7 +14,7 @@ export default function Hero() {
     const ctx = gsap.context(() => {
       // Intro timeline — lines rise, image scales down into frame.
       if (!prefersReducedMotion) {
-        const tl = gsap.timeline({ defaults: { ease: 'power4.out' } })
+        const tl = gsap.timeline({ defaults: { ease: 'power4.out' }, paused: true })
         tl.from('[data-hero-line] > span', {
           yPercent: 115,
           duration: 1.2,
@@ -30,6 +30,19 @@ export default function Hero() {
             { scale: 1.15, duration: 1.6, ease: 'power3.out' },
             0,
           )
+
+        // Start the intro only once fonts are ready, so the display font can't
+        // swap mid-animation and reflow the animating text (reads as a freeze).
+        // Capped so a slow font never leaves the heading hidden for long.
+        let started = false
+        const startIntro = () => {
+          if (started) return
+          started = true
+          tl.play()
+        }
+        if (document.fonts?.ready) document.fonts.ready.then(startIntro)
+        else startIntro()
+        gsap.delayedCall(0.4, startIntro)
 
         // Parallax drift on the hero image as the page scrolls away.
         // Touch scroll makes scrubbed image movement feel jittery, so this is

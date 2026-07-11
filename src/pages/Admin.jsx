@@ -1,11 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
+  getAuth,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth'
 import Seo from '../components/ui/Seo'
-import { auth } from '../lib/firebase'
+import { firebaseApp } from '../lib/firebase'
+
+// Initialized here (not in the shared firebase module) so the auth SDK and its
+// iframe handshake load only inside the CRM chunk, keeping public pages fast.
+const auth = getAuth(firebaseApp)
 import AdminSelect from '../components/admin/AdminSelect'
 import {
   deleteLead,
@@ -15,12 +20,13 @@ import {
   updateLeadStatus,
 } from '../lib/leads'
 import DessertsManager from '../components/admin/DessertsManager'
+import MasterclassesManager from '../components/admin/MasterclassesManager'
 import AdminTools from '../components/admin/AdminTools'
 import ConfirmDialog from '../components/admin/ConfirmDialog'
 
 const statusLabel = (status) =>
   leadStatuses.find((item) => item.id === status)?.label || 'Нова'
-const crmSections = ['leads', 'desserts', 'admin']
+const crmSections = ['leads', 'desserts', 'masterclasses', 'admin']
 const getInitialSection = () => {
   if (typeof window === 'undefined') return 'leads'
 
@@ -273,14 +279,18 @@ export default function Admin() {
                 ? 'Заявки клієнтів'
                 : section === 'desserts'
                   ? 'Редагування меню'
-                  : 'Для розробника'}
+                  : section === 'masterclasses'
+                    ? 'Майстер-класи'
+                    : 'Для розробника'}
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-mute">
               {section === 'leads'
                 ? 'Тут збираються форми замовлення десертів і бронювання майстер-класів'
                 : section === 'desserts'
                   ? 'Тут можна міняти товари, ціни, описи, фото та видимість у каталозі'
-                  : 'Системні дії для демо, портфоліо і повернення контенту до базового стану'}
+                  : section === 'masterclasses'
+                    ? 'Тут можна редагувати теми оформлення — назви, тривалість, місця, ціни та видимість'
+                    : 'Системні дії для демо, портфоліо і повернення контенту до базового стану'}
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -305,6 +315,7 @@ export default function Admin() {
           {[
             { id: 'leads', label: 'Заявки' },
             { id: 'desserts', label: 'Меню' },
+            { id: 'masterclasses', label: 'Майстер-класи' },
             { id: 'admin', label: 'Для розробника' },
           ].map((item) => (
             <button
@@ -466,6 +477,8 @@ export default function Admin() {
           </>
         ) : section === 'desserts' ? (
           <DessertsManager />
+        ) : section === 'masterclasses' ? (
+          <MasterclassesManager />
         ) : (
           <AdminTools />
         )}

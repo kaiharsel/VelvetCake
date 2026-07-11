@@ -83,8 +83,8 @@ export default function DessertsManager() {
   const [saving, setSaving] = useState(false)
   const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
-  const [visibilityPrompt, setVisibilityPrompt] = useState(null)
   const [deletePrompt, setDeletePrompt] = useState(null)
+  const [showPrompt, setShowPrompt] = useState(null)
 
   useEffect(() => {
     return subscribeDesserts(
@@ -324,27 +324,6 @@ export default function DessertsManager() {
     }
   }
 
-  const handleVisibilityToggle = () => {
-    if (!draft.slug) return
-    const nextVisible = draft.visible === false
-    setVisibilityPrompt({
-      dessert: { ...draft },
-      visible: nextVisible,
-      title: nextVisible ? 'Показати товар?' : 'Приховати товар?',
-      description: nextVisible
-        ? `Товар “${draft.name || draft.slug}” знову буде видно на сайті`
-        : `Товар “${draft.name || draft.slug}” зникне з меню на сайті, але залишиться в CRM`,
-      confirmLabel: nextVisible ? 'Показати' : 'Приховати',
-    })
-  }
-
-  const confirmVisibilityToggle = async () => {
-    if (!visibilityPrompt) return
-    const nextPrompt = visibilityPrompt
-    setVisibilityPrompt(null)
-    await saveProductVisibility(nextPrompt.dessert, nextPrompt.visible)
-  }
-
   const handleDeleteClick = () => {
     if (!draft.slug || isNew) return
 
@@ -354,6 +333,13 @@ export default function DessertsManager() {
       description: `Товар “${draft.name || draft.slug}” зникне з меню сайту`,
       confirmLabel: 'Видалити',
     })
+  }
+
+  const confirmShow = async () => {
+    if (!showPrompt) return
+    const dessert = showPrompt
+    setShowPrompt(null)
+    await saveProductVisibility(dessert, true)
   }
 
   const confirmDeleteDessert = async () => {
@@ -476,7 +462,7 @@ export default function DessertsManager() {
                   <div className="border-t border-blood-400/15 px-3 pb-3">
                     <button
                       type="button"
-                      onClick={() => saveProductVisibility(dessert, true)}
+                      onClick={() => setShowPrompt(dessert)}
                       disabled={saving}
                       className="focus-ring mt-3 w-full rounded-full bg-cream px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-ink transition-colors hover:bg-blood-400 hover:text-cream disabled:pointer-events-none disabled:opacity-60"
                     >
@@ -500,13 +486,6 @@ export default function DessertsManager() {
             <p className="mt-2 text-sm leading-relaxed text-mute">
               Натисніть “Додати товар”, щоб створити перший товар і заповнити його поля
             </p>
-            <button
-              type="button"
-              onClick={addDessert}
-              className="focus-ring mt-6 rounded-full bg-blood px-6 py-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-cream transition-colors hover:bg-blood-400"
-            >
-              Додати товар
-            </button>
           </div>
         </div>
       ) : (
@@ -534,30 +513,14 @@ export default function DessertsManager() {
               {saving ? 'Зберігаємо…' : 'Зберегти'}
             </button>
             {!isNew && draft.slug && (
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={handleDeleteClick}
-                  disabled={saving}
-                  className="focus-ring rounded-full border border-blood-400/45 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-blood-400 transition-colors hover:bg-blood hover:text-cream disabled:pointer-events-none disabled:opacity-60"
-                >
-                  Видалити
-                </button>
-                <button
-                  type="button"
-                  onClick={handleVisibilityToggle}
-                  disabled={saving}
-                  className={`focus-ring rounded-full border px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors disabled:pointer-events-none disabled:opacity-60 ${
-                    draft.visible === false
-                      ? 'border-cream/25 bg-cream text-ink hover:bg-blood-400 hover:text-cream'
-                      : 'border-blood-400/45 text-blood-400 hover:bg-blood hover:text-cream'
-                  }`}
-                >
-                  {draft.visible === false
-                    ? 'Показати'
-                    : 'Приховати'}
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={handleDeleteClick}
+                disabled={saving}
+                className="focus-ring rounded-full border border-blood-400/45 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-blood-400 transition-colors hover:bg-blood hover:text-cream disabled:pointer-events-none disabled:opacity-60"
+              >
+                Видалити
+              </button>
             )}
           </div>
         </div>
@@ -851,15 +814,6 @@ export default function DessertsManager() {
       </section>
 
       <ConfirmDialog
-        open={Boolean(visibilityPrompt)}
-        title={visibilityPrompt?.title}
-        description={visibilityPrompt?.description}
-        confirmLabel={visibilityPrompt?.confirmLabel}
-        loading={saving}
-        onCancel={() => setVisibilityPrompt(null)}
-        onConfirm={confirmVisibilityToggle}
-      />
-      <ConfirmDialog
         open={Boolean(deletePrompt)}
         title={deletePrompt?.title}
         description={deletePrompt?.description}
@@ -867,6 +821,16 @@ export default function DessertsManager() {
         loading={saving}
         onCancel={() => setDeletePrompt(null)}
         onConfirm={confirmDeleteDessert}
+      />
+
+      <ConfirmDialog
+        open={Boolean(showPrompt)}
+        title="Показати на сайті?"
+        description={showPrompt ? `«${showPrompt.title || showPrompt.slug}» знову зʼявиться на сайті.` : ''}
+        confirmLabel="Показати"
+        loading={saving}
+        onCancel={() => setShowPrompt(null)}
+        onConfirm={confirmShow}
       />
     </>
   )

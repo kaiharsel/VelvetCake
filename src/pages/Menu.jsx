@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import Seo from '../components/ui/Seo'
@@ -15,6 +15,7 @@ export default function Menu() {
   const heroRef = useRef(null)
   const controlsRef = useRef(null)
   const catalogRef = useRef(null)
+  const railRef = useRef(null)
   const [params, setParams] = useSearchParams()
   const initialCat = params.get('cat') || 'all'
   const [cat, setCat] = useState(
@@ -46,6 +47,22 @@ export default function Menu() {
 
     return () => ctx.revert()
   }, [])
+
+  // Keep the active category chip in view inside the horizontal rail (mobile).
+  // Matters when arriving from the Home page with a category that sits past the
+  // visible start of the row.
+  useEffect(() => {
+    const rail = railRef.current
+    if (!rail) return
+    const activeChip = rail.querySelector('[aria-selected="true"]')
+    if (!activeChip) return
+    const target =
+      activeChip.offsetLeft - (rail.clientWidth - activeChip.clientWidth) / 2
+    rail.scrollTo({
+      left: Math.max(target, 0),
+      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+    })
+  }, [cat])
 
   const scrollToCatalogStart = () => {
     window.requestAnimationFrame(() => {
@@ -131,6 +148,7 @@ export default function Menu() {
         <div className="container-shell flex flex-col gap-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="relative min-w-0 lg:flex-1">
             <div
+              ref={railRef}
               onScroll={(event) => {
                 const rail = event.currentTarget
                 setShowCategoryHint(
@@ -160,11 +178,11 @@ export default function Menu() {
             </div>
             <div
               aria-hidden="true"
-              className={`pointer-events-none absolute inset-y-0 right-0 z-10 flex w-16 items-center justify-end bg-gradient-to-l from-ink via-ink/95 to-transparent pr-1 transition-opacity duration-300 lg:hidden ${
+              className={`pointer-events-none absolute right-0 top-0 bottom-1 z-10 flex w-16 items-center justify-end bg-gradient-to-l from-ink/90 via-ink/50 to-transparent pr-1 transition-opacity duration-300 lg:hidden ${
                 showCategoryHint ? 'opacity-100' : 'opacity-0'
               }`}
             >
-              <span className="grid h-8 w-8 place-items-center rounded-full border border-blood-400/60 bg-ink text-blood-400">
+              <span className="grid h-8 w-8 place-items-center rounded-full border border-blood-400/60 bg-ink/80 text-blood-400 backdrop-blur-md">
                 <ChevronRight className="h-5 w-5" />
               </span>
             </div>
@@ -175,6 +193,7 @@ export default function Menu() {
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              onFocus={scrollToCatalogStart}
               placeholder="Пошук десерту…"
               aria-label="Пошук десерту"
               className="w-full rounded-full border border-wine-700/70 bg-transparent py-2.5 pl-11 pr-4 text-sm text-cream placeholder:text-mute transition-colors focus:border-blood-400/70 focus:outline-none focus:ring-1 focus:ring-blood-400/30"
