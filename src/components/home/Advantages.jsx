@@ -110,6 +110,7 @@ export default function Advantages() {
   return (
     <section ref={section} className="relative bg-ink py-24 md:py-32">
       <div className="container-shell">
+        <h2 className="sr-only">Наші переваги</h2>
         {/* Mobile horizontal carousel */}
         <div className="md:hidden">
           <div className="mb-8 pl-2">

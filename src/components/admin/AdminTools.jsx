@@ -125,7 +125,7 @@ export default function AdminTools() {
           <ToolCard
             title="Майстер-класи"
             text="Повертає теми оформлення майстер-класів до початкового списку з коду. Назви, ціни, тривалість, порядок і видимість стануть базовими"
-            buttonLabel={syncingMc ? 'Відкатуємо…' : 'Скинути майстер-класи'}
+            buttonLabel={syncingMc ? 'Відкатуємо…' : 'Відкотити теми'}
             disabled={syncingMc}
             onClick={() =>
               runAction({

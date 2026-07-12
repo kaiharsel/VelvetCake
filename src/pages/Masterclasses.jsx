@@ -168,7 +168,7 @@ export default function Masterclasses() {
     <>
       <Seo
         title="Майстер-класи"
-        description="Майстер-класи VelvetCake: дзеркальна глазур, авторські торти, трайфли та макарони. Для будь-якого рівня. Забронюйте місце онлайн"
+        description="Майстер-класи бенто-тортів у Львові від VelvetCake. Для будь-якого рівня, навіть без досвіду. Заберете власний торт. Забронюйте місце онлайн"
         path="/masterclasses"
       />
 
@@ -249,12 +249,11 @@ export default function Masterclasses() {
               </p>
             </div>
           ) : (
-          <Reveal className="mt-14 flex flex-col" stagger={0.08} start="top 118%" y={40}>
+          <div className="mt-14 flex flex-col">
             {masterclasses.map((mc, i) => (
               <DelayedButton
                 key={mc.slug}
                 type="button"
-                data-reveal
                 onClick={() => {
                   setSelected(mc.slug)
                   document.getElementById('booking')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -264,15 +263,21 @@ export default function Masterclasses() {
                 <span className="font-display text-4xl leading-none text-blood/40 md:col-span-1">
                   {String(i + 1).padStart(2, '0')}
                 </span>
-                <div className="md:col-span-7">
+                <div className="md:col-span-6">
                   <h3 className="font-display text-3xl text-cream transition-colors md:text-4xl md:group-hover:text-blood-400">
                     {mc.title}
                   </h3>
                   <p className="mt-2 max-w-md text-sm text-mute">{mc.text}</p>
                 </div>
-                <div className="flex flex-col gap-1 text-sm text-cream/80 md:col-span-2">
-                  <span>{mc.duration}</span>
-                  <span>{mc.seats} місць</span>
+                <div className="flex flex-col gap-2 text-sm text-cream/80 md:col-span-3 md:flex-row md:items-center md:gap-16">
+                  <span className="flex flex-col">
+                    <span className="text-[10px] uppercase tracking-[0.14em] text-mute">Тривалість</span>
+                    <span>{mc.duration}</span>
+                  </span>
+                  <span className="flex flex-col">
+                    <span className="text-[10px] uppercase tracking-[0.14em] text-mute">Місць</span>
+                    <span>{mc.seats}</span>
+                  </span>
                 </div>
                 <div className="flex items-center justify-between gap-4 md:col-span-2 md:justify-end">
                   <span className="price-display text-3xl font-semibold leading-none tracking-tight text-cream md:text-4xl">
@@ -282,7 +287,7 @@ export default function Masterclasses() {
                 </div>
               </DelayedButton>
             ))}
-          </Reveal>
+          </div>
           )}
         </div>
       </section>

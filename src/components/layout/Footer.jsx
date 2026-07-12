@@ -1,9 +1,20 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { nav, site } from '../../data/site'
 import BrandMark from '../ui/BrandMark'
 import SocialLink from '../ui/SocialLink'
 
 export default function Footer() {
+  const { pathname } = useLocation()
+
+  // Clicking a footer link that points to the page you're already on should
+  // refresh it, instead of React Router doing nothing.
+  const handleSamePathClick = (to) => (event) => {
+    if (to === pathname) {
+      event.preventDefault()
+      window.location.reload()
+    }
+  }
+
   return (
     <footer className="safe-area-bottom relative overflow-hidden border-t border-cream/10 bg-ink pt-20">
       <div className="container-shell">
@@ -18,7 +29,7 @@ export default function Footer() {
               </div>
             </div>
             <p className="mt-6 max-w-sm text-pretty leading-relaxed text-mute">
-              Авторська кондитерська зі Львова. Створюємо торти й десерти
+              Кондитерська у Львові. Створюємо торти й десерти
               ручної роботи з {site.founded} року
             </p>
             <a
@@ -39,6 +50,7 @@ export default function Footer() {
                 <li key={item.to}>
                   <Link
                     to={item.to}
+                    onClick={handleSamePathClick(item.to)}
                     className="focus-ring text-cream/80 transition-colors hover:text-blood-400"
                   >
                     {item.label}
@@ -48,6 +60,7 @@ export default function Footer() {
               <li>
                 <Link
                   to="/menu"
+                  onClick={handleSamePathClick('/menu')}
                   className="focus-ring text-cream/80 transition-colors hover:text-blood-400"
                 >
                   Оформити замовлення

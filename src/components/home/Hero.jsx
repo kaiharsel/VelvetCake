@@ -157,9 +157,9 @@ export default function Hero() {
             data-hero-fade
             className="max-w-md text-pretty text-base leading-relaxed text-cream/80 md:text-lg"
           >
-            Замовте торт у подарунок або просто почастуйте себе смачненьким.
-            Ми втілимо ваші солодкі бажання в реальність і подаруємо приємні
-            емоції та спогади
+            Замовте торт на свята у Львові або просто почастуйте себе
+            смачненьким. Ми втілимо ваші солодкі бажання в реальність і
+            подаруємо приємні емоції та спогади
           </p>
 
           <div data-hero-fade className="flex flex-wrap items-center gap-4">

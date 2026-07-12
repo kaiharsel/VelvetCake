@@ -2,6 +2,14 @@
 <html lang="uk">
   <head>
     <meta charset="UTF-8" />
+    <!-- Run first: never restore the previous scroll position on reload, and
+         start every load at the very top (mobile + desktop). -->
+    <script>
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
+      window.addEventListener('beforeunload', function () {
+        window.scrollTo(0, 0)
+      })
+    </script>
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta
       name="viewport"
@@ -9,10 +17,10 @@
     />
     <meta name="theme-color" content="#0C0809" />
 
-    <title>VelvetCake | Кондитерська у Львові</title>
+    <title>VelvetCake | Торти, весільні торти, капкейки, бенто у Львові</title>
     <meta
       name="description"
-      content="VelvetCake у Львові. Авторська кондитерська з тортами, капкейками, бенто, кенді-барами та майстер-класами ручної роботи. Швидке замовлення за телефоном 093 106 79 43"
+      content="VelvetCake — торти, весільні торти, капкейки та бенто у Львові. Також кенді-бари, десерти й майстер-класи ручної роботи. Швидке замовлення за телефоном 093 106 79 43"
     />
     <meta name="author" content="VelvetCake" />
     <link rel="canonical" href="https://velvetcake.example/" />
@@ -20,10 +28,10 @@
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="VelvetCake" />
-    <meta property="og:title" content="VelvetCake | Кондитерська у Львові" />
+    <meta property="og:title" content="VelvetCake | Торти, весільні торти, капкейки, бенто у Львові" />
     <meta
       property="og:description"
-      content="Торти, капкейки, бенто, десерти, кенді бар та майстер-класи ручної роботи у Львові"
+      content="Торти, весільні торти, капкейки та бенто у Львові. Також кенді-бари, десерти й майстер-класи ручної роботи"
     />
     <meta property="og:image" content="/og.jpg" />
     <meta property="og:locale" content="uk_UA" />

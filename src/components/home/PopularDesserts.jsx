@@ -43,7 +43,10 @@ export default function PopularDesserts() {
         ease: 'none',
         scrollTrigger: {
           trigger: el,
-          start: 'top top',
+          // Begin the sideways scroll only once the whole section has scrolled
+          // up so its bottom edge meets the bottom of the viewport (fully in
+          // view), rather than the moment its top touches the top.
+          start: 'bottom bottom',
           end: () => `+=${distance()}`,
           scrub: 1,
           pin: true,

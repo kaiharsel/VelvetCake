@@ -130,7 +130,7 @@ function EditCard({ mc, isNew = false, nextOrder = 1, onSaved, onDelete, onCance
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="focus-ring rounded-full bg-blood px-5 py-2.5 text-[12px] font-semibold uppercase tracking-[0.12em] text-cream transition-colors hover:bg-blood-400 disabled:pointer-events-none disabled:opacity-60"
+          className="focus-ring rounded-full bg-cream px-5 py-2.5 text-[12px] font-semibold uppercase tracking-[0.12em] text-ink transition-colors hover:bg-blood-400 hover:text-cream disabled:pointer-events-none disabled:opacity-60"
         >
           {saving ? 'Зберігаємо…' : 'Зберегти'}
         </button>

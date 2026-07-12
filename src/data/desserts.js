@@ -17,7 +17,7 @@ export const desserts = [
     slug: 'klasychnyi-tort',
     name: 'Класичний торт',
     category: 'torty',
-    tagline: 'Класичні, авторські, весільні',
+    tagline: 'Класичні та весільні',
     price: 1200,
     unit: 'за кг',
     priceNote: 'від 1200 грн / кг',

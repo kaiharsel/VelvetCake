@@ -2,7 +2,7 @@
 // Real data from the confectionery's Instagram (@velvet_cake_lviv).
 export const site = {
   name: 'VelvetCake',
-  tagline: 'Кондитерська у Львові',
+  tagline: 'Торти, весільні торти, капкейки, бенто у Львові',
   founded: 2021, // 5 років досвіду
   city: 'Львів',
   phone: '093 106 79 43',

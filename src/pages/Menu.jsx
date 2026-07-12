@@ -113,7 +113,7 @@ export default function Menu() {
     <>
       <Seo
         title="Меню"
-        description="Меню VelvetCake: авторські торти, трайфли, тістечка та сигнатурні десерти темного люксу. Оберіть і оформіть замовлення онлайн"
+        description="Меню VelvetCake у Львові: торти, весільні торти, капкейки та бенто, а також кенді-бари, трайфли й десерти. Оберіть і оформіть замовлення онлайн"
         path="/menu"
       />
 
@@ -178,7 +178,7 @@ export default function Menu() {
             </div>
             <div
               aria-hidden="true"
-              className={`pointer-events-none absolute right-0 top-0 bottom-1 z-10 flex w-16 items-center justify-end bg-gradient-to-l from-ink/90 via-ink/50 to-transparent pr-1 transition-opacity duration-300 lg:hidden ${
+              className={`pointer-events-none absolute right-0 top-0 bottom-1 z-10 flex items-center justify-end pr-1 transition-opacity duration-300 lg:hidden ${
                 showCategoryHint ? 'opacity-100' : 'opacity-0'
               }`}
             >
@@ -214,6 +214,7 @@ export default function Menu() {
       {/* Grid */}
       <section ref={catalogRef} className="bg-ink py-14 md:py-20">
         <div className="container-shell">
+          <h2 className="sr-only">Каталог десертів</h2>
           <p className="mb-8 text-sm text-mute">
             Показано {filtered.length}{' '}
             {filtered.length === 1 ? 'десерт' : 'десертів'}
